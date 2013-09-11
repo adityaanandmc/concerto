@@ -3,6 +3,8 @@
 
 typedef enum __NodeType
 {
+    UndefinedNodeType = 0x02,
+
     UsecaseType = 0x55,
     ActorType,
     SubFlowType,

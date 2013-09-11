@@ -5,6 +5,10 @@
 
 #include "diagramwindow.h"
 
+#include "NodeDefs.h"
+#include "RelationDefs.h"
+#include "DocumentModel.h"
+
 Concerto::Concerto(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Concerto)
@@ -22,7 +26,19 @@ Concerto::Concerto(QWidget *parent) :
         this, SLOT(setActiveSubWindow(QWidget *))
     );
 
-    setUnifiedTitleAndToolBarOnMac(true);
+    IDocumentModel *model = new DocumentModel("Test", "A sample diagram");
+    qDebug("Created model!");
+    INode *thisNode = new ActorNode(), *thatNode = new UsecaseNode();
+    qDebug("Created nodes!");
+    IRelation *theRelation = new UnidirectionalAssociation();
+    qDebug("Created the relation!");
+    model->addNode(thisNode);
+    model->addNode(thatNode);
+    qDebug("Successfully added the nodes!");
+    model->relate(theRelation, thisNode, thatNode);
+    qDebug("Successfully related the nodes!");
+    delete model;
+    qDebug("Model destroyed!");
 }
 
 Concerto::~Concerto()
@@ -59,6 +75,7 @@ void Concerto::connectMenuActions()
     connect(ui->menu_Window, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
 
     // Help Menu
+    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(aboutAction()));
 }
 
 void Concerto::newFileAction()
@@ -66,6 +83,18 @@ void Concerto::newFileAction()
     DiagramWindow *theChild = this->createMdiChild();
 
     theChild->show();
+}
+
+void Concerto::aboutAction()
+{
+    QMessageBox::about(this,
+         tr("About useCase Designer"),
+         tr("<h1>useCaseDesigner</h1><h5>v0.1</h5><br /><br />"
+           "The <b>useCase Designer</b> is an interactive<br />"
+           "use-case design tool, that visualizes software<br />"
+           "complexity and calculates estimated costs.<br /><br />"
+           "<center><i>Based on Original Research By</i><br />Prof. Sathis Kumar<br /><br />"
+           "<i>Programmed By:</i><br />S. Amrith Nayak</center>"));
 }
 
 void Concerto::updateMenus()

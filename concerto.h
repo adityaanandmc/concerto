@@ -23,6 +23,7 @@ protected:
 
 private slots:
     void newFileAction();
+    void aboutAction();
 
     DiagramWindow *createMdiChild();
     void updateMenus();

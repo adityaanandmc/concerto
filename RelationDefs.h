@@ -1,7 +1,10 @@
 #ifndef RELATIONDEFS_H
 #define RELATIONDEFS_H
 
-#include "Relation.h"
+#include "Relations/BidirectionalAssociationRelation.h"
+#include "Relations/ExtensionPointRelation.h"
+#include "Relations/UnidirectionalAssociationRelation.h"
+#include "Relations/UsesRelation.h"
 
 #include "Identified.h"
 #include "Coloured.h"
@@ -10,21 +13,21 @@
 typedef Identified<
             Positioned<
                 Coloured<
-                    Relation<UnidirectionalAssociationType> > > > UnidirectionalAssociation;
+                    UnidirectionalAssociationRelation > > > UnidirectionalAssociation;
 
 typedef Identified<
             Positioned<
                 Coloured<
-                    Relation<BidirectionalAssociationType> > > > BidirectionalAssociation;
+                    BidirectionalAssociationRelation > > > BidirectionalAssociation;
 
 typedef Identified<
             Positioned<
                 Coloured<
-                    Relation<ExtensionPointType> > > > ExtensionPoint;
+                    ExtensionPointRelation > > > ExtensionPoint;
 
 typedef Identified<
             Positioned<
                 Coloured<
-                    Relation<UsesType> > > > UsesAssociation;
+                    UsesRelation > > > UsesAssociation;
 
 #endif // RELATIONDEFS_H

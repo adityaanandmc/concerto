@@ -4,18 +4,20 @@
 #include "INode.h"
 #include <string>
 
-template <NodeType nodeType>
 class Node : public INode
 {
 public:
     Node()
     {
-        this->theType = nodeType;
+        this->theType = UndefinedNodeType;
     }
+
+    virtual ~Node() {}
 
     bool canBeSentinel() const
     {
-        switch (nodeType) {
+        switch (theType) {
+        case UndefinedNodeType:
         case UsecaseType:
         case ActorType:
         case GeomCircleType:
@@ -27,8 +29,11 @@ public:
         case SubFlowType:
         case AltFlowType:
         case SecFlowType:
+        default:
             return false;
         }
+
+        return false; // pretty much useless, but suppresses annoying warnings #gcc
     }
 
     const std::string getName() const

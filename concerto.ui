@@ -17,10 +17,21 @@
    <iconset resource="Image-Resources.qrc">
     <normaloff>:/icons/images/ucicon.png</normaloff>:/icons/images/ucicon.png</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #444;
+color: #e6e6e6;
+border-color: #999;</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QMdiArea" name="mdiArea">
+      <property name="styleSheet">
+       <string notr="true">color: #222;</string>
+      </property>
       <property name="background">
        <brush brushstyle="Dense1Pattern">
         <color alpha="255">
@@ -172,6 +183,112 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="toolBoxDock">
+   <property name="toolTip">
+    <string>Tool Box Dockable Window</string>
+   </property>
+   <property name="statusTip">
+    <string>You can move this around the workspace!</string>
+   </property>
+   <property name="accessibleName">
+    <string>Tool Box Dock</string>
+   </property>
+   <property name="accessibleDescription">
+    <string>Contains tools that help you construct a diagram</string>
+   </property>
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Tool Box Dock</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QToolBox" name="toolBox">
+       <property name="toolTip">
+        <string>Tool Box</string>
+       </property>
+       <property name="statusTip">
+        <string>Select a tool</string>
+       </property>
+       <property name="accessibleName">
+        <string>Tool Box</string>
+       </property>
+       <property name="accessibleDescription">
+        <string>Allows you to select a tool to construct a diagram</string>
+       </property>
+       <property name="tabSpacing">
+        <number>6</number>
+       </property>
+       <widget class="QWidget" name="nodeToolsPage">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>211</width>
+          <height>279</height>
+         </rect>
+        </property>
+        <attribute name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/items/user-add.png</normaloff>:/icons/images/items/user-add.png</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>Actors, &amp;Usecases and Flows</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>Tools to add actors and use-cases to the diagram</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="relationToolsPage">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>211</width>
+          <height>277</height>
+         </rect>
+        </property>
+        <attribute name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/items/connector.png</normaloff>:/icons/images/items/connector.png</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>&amp;Associations</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>Relation tools that help relate two nodes in the diagram</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="geometryToolsPage">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>211</width>
+          <height>277</height>
+         </rect>
+        </property>
+        <attribute name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/items/text.png</normaloff>:/icons/images/items/text.png</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>&amp;Miscellaneous</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>Shapes and more tools to add to the diagram!</string>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="action_New">
    <property name="icon">
     <iconset resource="Image-Resources.qrc">

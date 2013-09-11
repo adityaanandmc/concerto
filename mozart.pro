@@ -14,7 +14,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         concerto.cpp \
-    diagramwindow.cpp
+    diagramwindow.cpp \
+    DocumentModel.cpp
 
 HEADERS  += concerto.h \
     diagramwindow.h \
@@ -37,7 +38,26 @@ HEADERS  += concerto.h \
     IAuthor.h \
     Author.h \
     IDiagram.h \
-    Diagram.h
+    Diagram.h \
+    DocumentModel.h \
+    IDocumentModel.h \
+    GraphDefs.h \
+    Nodes/UsecaseGraphNode.h \
+    Nodes/ActorGraphNode.h \
+    Nodes/SubFlowGraphNode.h \
+    Nodes/SecFlowGraphNode.h \
+    Nodes/SquareGraphNode.h \
+    Nodes/AltFlowGraphNode.h \
+    Nodes/RectangleGraphNode.h \
+    Nodes/CircleGraphNode.h \
+    Nodes/TriangleGraphNode.h \
+    Relations/UnidirectionalAssociationRelation.h \
+    Relations/BidirectionalAssociationRelation.h \
+    Relations/ExtensionPointRelation.h \
+    Relations/UsesRelation.h \
+    Graph/Vertex.h \
+    Graph/Edge.h \
+    Graph/DiagramInfo.h
 
 FORMS    += concerto.ui
 

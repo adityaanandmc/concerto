@@ -1,15 +1,16 @@
 #ifndef RELATION_H
 #define RELATION_H
 
-#include "RelationType.h"
+#include "IRelation.h"
 
 #include <string>
 
-template <RelationType relationType>
 class Relation : public IRelation
 {
 public:
-    const bool isBidirectional() const
+    virtual ~Relation() {}
+
+    bool isBidirectional() const
     {
         switch (theType) {
         case BidirectionalAssociationType:
@@ -30,7 +31,7 @@ public:
         this->theTitle = theTitle;
     }
 
-    const RelationType getType() const
+    RelationType getType() const
     {
         return theType;
     }

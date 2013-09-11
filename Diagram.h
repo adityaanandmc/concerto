@@ -6,6 +6,8 @@
 class Diagram : public IDiagram
 {
 public:
+    virtual ~Diagram() {}
+
     const std::string& getTitle() const
     {
         return theTitle;

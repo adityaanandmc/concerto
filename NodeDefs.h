@@ -1,7 +1,15 @@
 #ifndef NODEDEFS_H
 #define NODEDEFS_H
 
-#include "Node.h"
+#include "Nodes/ActorGraphNode.h"
+#include "Nodes/AltFlowGraphNode.h"
+#include "Nodes/CircleGraphNode.h"
+#include "Nodes/RectangleGraphNode.h"
+#include "Nodes/SecFlowGraphNode.h"
+#include "Nodes/SquareGraphNode.h"
+#include "Nodes/SubFlowGraphNode.h"
+#include "Nodes/TriangleGraphNode.h"
+#include "Nodes/UsecaseGraphNode.h"
 
 #include "Identified.h"
 #include "Attributed.h"
@@ -12,50 +20,50 @@ typedef Identified<
             Attributed<
                 Positioned<
                     Coloured<
-                        Node<UsecaseType> > > > > UsecaseNode;
+                        UsecaseGraphNode > > > > UsecaseNode;
 
 typedef Identified<
             Attributed<
                 Positioned<
                     Coloured<
-                        Node<ActorType> > > > > ActorNode;
+                        ActorGraphNode > > > > ActorNode;
 
 typedef Identified<
             Attributed<
                 Positioned<
                     Coloured<
-                        Node<SubFlowType> > > > > SubFlowNode;
+                        SubFlowGraphNode > > > > SubFlowNode;
 
 typedef Identified<
             Attributed<
                 Positioned<
                     Coloured<
-                        Node<AltFlowType> > > > > AltFlowNode;
+                        AltFlowGraphNode > > > > AltFlowNode;
 
 typedef Identified<
             Attributed<
                 Positioned<
                     Coloured<
-                        Node<SecFlowType> > > > > SecFlowNode;
+                        SecFlowGraphNode > > > > SecFlowNode;
 
 typedef Identified<
             Positioned<
                 Coloured<
-                    Node<GeomSquareType> > > > SquareNode;
+                    SquareGraphNode > > > SquareNode;
 
 typedef Identified<
             Positioned<
                 Coloured<
-                    Node<GeomRectangleType> > > > RectangleNode;
+                    RectangleGraphNode > > > RectangleNode;
 
 typedef Identified<
             Positioned<
                 Coloured<
-                    Node<GeomCircleType> > > > CircleNode;
+                    CircleGraphNode > > > CircleNode;
 
 typedef Identified<
             Positioned<
                 Coloured<
-                    Node<GeomTriangleType> > > > TriangleNode;
+                    TriangleGraphNode > > > TriangleNode;
 
 #endif // NODEDEFS_H
