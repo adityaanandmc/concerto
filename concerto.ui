@@ -18,9 +18,10 @@
     <normaloff>:/icons/images/ucicon.png</normaloff>:/icons/images/ucicon.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: #444;
+   <string notr="true">/*background-color: #444;
 color: #e6e6e6;
-border-color: #999;</string>
+border-color: #999;
+*/</string>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>true</bool>
@@ -136,6 +137,8 @@ border-color: #999;</string>
     <property name="title">
      <string>&amp;Object</string>
     </property>
+    <addaction name="action_Remove"/>
+    <addaction name="separator"/>
     <addaction name="actionSend_Backward"/>
     <addaction name="actionSend_Forward"/>
    </widget>
@@ -181,6 +184,13 @@ border-color: #999;</string>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_New"/>
+   <addaction name="action_Open"/>
+   <addaction name="separator"/>
+   <addaction name="action_Save"/>
+   <addaction name="actionSave_As"/>
+   <addaction name="separator"/>
+   <addaction name="action_Print"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="toolBoxDock">
@@ -230,7 +240,7 @@ border-color: #999;</string>
           <x>0</x>
           <y>0</y>
           <width>211</width>
-          <height>279</height>
+          <height>250</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -243,14 +253,194 @@ border-color: #999;</string>
         <attribute name="toolTip">
          <string>Tools to add actors and use-cases to the diagram</string>
         </attribute>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="1" column="0">
+          <widget class="QToolButton" name="addSubFlowButton">
+           <property name="toolTip">
+            <string>Sub Flow</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a Sub-Flow Node</string>
+           </property>
+           <property name="whatsThis">
+            <string>Sub Flow Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Sub Flow</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a new Sub Flow Node to the diagram</string>
+           </property>
+           <property name="text">
+            <string>Sub Flow</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/subflow.png</normaloff>:/icons/images/items/subflow.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>S</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QToolButton" name="addAltFlowButton">
+           <property name="toolTip">
+            <string>Alternate Flow</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a new Alternate Flow</string>
+           </property>
+           <property name="whatsThis">
+            <string>Alternate Flow Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Alternate Flow</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a new Alternate Flow to the diagram</string>
+           </property>
+           <property name="text">
+            <string>Alternate Flow</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/altflow.png</normaloff>:/icons/images/items/altflow.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>L</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QToolButton" name="addUsecaseButton">
+           <property name="toolTip">
+            <string>Usecase</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a new Usecase</string>
+           </property>
+           <property name="whatsThis">
+            <string>Usecase Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Usecase</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a new Usecase to the diagram</string>
+           </property>
+           <property name="text">
+            <string>Use Case</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/usecase-add.png</normaloff>:/icons/images/items/usecase-add.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>U</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QToolButton" name="addActorButton">
+           <property name="toolTip">
+            <string>Actor</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a new Actor</string>
+           </property>
+           <property name="whatsThis">
+            <string>Actor Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Actor</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a new Actor</string>
+           </property>
+           <property name="text">
+            <string>Actor</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/user-add.png</normaloff>:/icons/images/items/user-add.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>A</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QToolButton" name="addSecFlowButton">
+           <property name="toolTip">
+            <string>Security Flow</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a Security Flow Node</string>
+           </property>
+           <property name="whatsThis">
+            <string>Security Flow Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Security Flow</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a Security Flow to the diagram</string>
+           </property>
+           <property name="text">
+            <string>Security Flow</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/security.png</normaloff>:/icons/images/items/security.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>E</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="relationToolsPage">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>211</width>
-          <height>277</height>
+          <width>132</width>
+          <height>136</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -263,14 +453,156 @@ border-color: #999;</string>
         <attribute name="toolTip">
          <string>Relation tools that help relate two nodes in the diagram</string>
         </attribute>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QToolButton" name="addUnidirectionalAssociationButton">
+           <property name="toolTip">
+            <string>Unidirectional Association</string>
+           </property>
+           <property name="statusTip">
+            <string>Relate nodes with the Unidirectional Association Tool</string>
+           </property>
+           <property name="whatsThis">
+            <string>Association Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Association</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Relate nodes with the Unidirectional Association Tool</string>
+           </property>
+           <property name="text">
+            <string>Unidirectional Association</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/connector.png</normaloff>:/icons/images/items/connector.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>A</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QToolButton" name="addBidirectionalAssociationButton">
+           <property name="toolTip">
+            <string>Bidirectional Association</string>
+           </property>
+           <property name="statusTip">
+            <string>Relate two nodes with the bidirectional association tool</string>
+           </property>
+           <property name="whatsThis">
+            <string>Bidirectional Association Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Bidirectional Association</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Relate two nodes with the bidirectional association tool</string>
+           </property>
+           <property name="text">
+            <string>Bidirectional Association</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/bidirectional-connector.png</normaloff>:/icons/images/items/bidirectional-connector.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>B</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QToolButton" name="addExtensionPointButton">
+           <property name="toolTip">
+            <string>Extension Point</string>
+           </property>
+           <property name="statusTip">
+            <string>Extend a usecase with the Extension Point</string>
+           </property>
+           <property name="whatsThis">
+            <string>Extension Point Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Extension Point</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Extend a usecase with the Extension Point</string>
+           </property>
+           <property name="text">
+            <string>Extension Point</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/extension.png</normaloff>:/icons/images/items/extension.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>X</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QToolButton" name="addUsesButton">
+           <property name="toolTip">
+            <string>Uses</string>
+           </property>
+           <property name="statusTip">
+            <string>Relate usecases with the Uses tool</string>
+           </property>
+           <property name="whatsThis">
+            <string>Uses Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Uses</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Relate usecases with the Uses tool</string>
+           </property>
+           <property name="text">
+            <string>Uses</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/uses.png</normaloff>:/icons/images/items/uses.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>U</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="geometryToolsPage">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>211</width>
-          <height>277</height>
+          <width>132</width>
+          <height>136</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -283,11 +615,169 @@ border-color: #999;</string>
         <attribute name="toolTip">
          <string>Shapes and more tools to add to the diagram!</string>
         </attribute>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="1">
+          <widget class="QToolButton" name="addRectangleButton">
+           <property name="toolTip">
+            <string>Rectangle</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a Rectangular Note</string>
+           </property>
+           <property name="whatsThis">
+            <string>Rectangle Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Rectangle</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a Rectangular Note</string>
+           </property>
+           <property name="text">
+            <string>Rectangle</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/rectangle.png</normaloff>:/icons/images/items/rectangle.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>R</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QToolButton" name="addSquareButton">
+           <property name="toolTip">
+            <string>Square</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a Square Note</string>
+           </property>
+           <property name="whatsThis">
+            <string>Square Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Square</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a Square Note</string>
+           </property>
+           <property name="text">
+            <string>Square</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/square.png</normaloff>:/icons/images/items/square.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>S</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QToolButton" name="addCircleButton">
+           <property name="toolTip">
+            <string>Circle</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a Circle</string>
+           </property>
+           <property name="whatsThis">
+            <string>Circle Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Circle</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a Circle</string>
+           </property>
+           <property name="text">
+            <string>Circle</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/circle.png</normaloff>:/icons/images/items/circle.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>C</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QToolButton" name="addTriangleButton">
+           <property name="toolTip">
+            <string>Triangle</string>
+           </property>
+           <property name="statusTip">
+            <string>Add a Triangle</string>
+           </property>
+           <property name="whatsThis">
+            <string>Triangle Tool</string>
+           </property>
+           <property name="accessibleName">
+            <string>Triangle</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>Add a Triangle</string>
+           </property>
+           <property name="text">
+            <string>Triangle</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Image-Resources.qrc">
+             <normaloff>:/icons/images/items/triangle.png</normaloff>:/icons/images/items/triangle.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>T</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="pointerToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_Creator"/>
+   <addaction name="action_Move"/>
+   <addaction name="separator"/>
+   <addaction name="action_Select"/>
+   <addaction name="action_Relation_Selector"/>
   </widget>
   <action name="action_New">
    <property name="icon">
@@ -496,6 +986,10 @@ border-color: #999;</string>
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/items/connector.png</normaloff>:/icons/images/items/connector.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Unidirectional</string>
    </property>
@@ -503,6 +997,10 @@ border-color: #999;</string>
   <action name="action_Bidirectional">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/items/bidirectional-connector.png</normaloff>:/icons/images/items/bidirectional-connector.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Bidirectional</string>
@@ -536,6 +1034,10 @@ border-color: #999;</string>
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/items/square.png</normaloff>:/icons/images/items/square.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Square</string>
    </property>
@@ -543,6 +1045,10 @@ border-color: #999;</string>
   <action name="action_Rectangle">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/items/rectangle.png</normaloff>:/icons/images/items/rectangle.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Rectangle</string>
@@ -552,6 +1058,10 @@ border-color: #999;</string>
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/items/circle.png</normaloff>:/icons/images/items/circle.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Circle</string>
    </property>
@@ -559,6 +1069,10 @@ border-color: #999;</string>
   <action name="action_Triangle">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/items/triangle.png</normaloff>:/icons/images/items/triangle.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Triangle</string>
@@ -655,6 +1169,89 @@ border-color: #999;</string>
   <action name="actionS_witch_Layout_Direction">
    <property name="text">
     <string>S&amp;witch Layout Direction</string>
+   </property>
+  </action>
+  <action name="action_Remove">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Remove</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="action_Creator">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/cursors/pointer.png</normaloff>:/icons/images/cursors/pointer.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Creator</string>
+   </property>
+   <property name="toolTip">
+    <string>Allows you to create new nodes</string>
+   </property>
+   <property name="shortcut">
+    <string>Ins</string>
+   </property>
+  </action>
+  <action name="action_Move">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/cursors/move.png</normaloff>:/icons/images/cursors/move.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Move</string>
+   </property>
+   <property name="toolTip">
+    <string>Move nodes around</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="action_Select">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/cursors/black-pointer.png</normaloff>:/icons/images/cursors/black-pointer.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Helps you select nodes in the diagram</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+?</string>
+   </property>
+  </action>
+  <action name="action_Relation_Selector">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Image-Resources.qrc">
+     <normaloff>:/icons/images/cursors/linepointer.png</normaloff>:/icons/images/cursors/linepointer.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Relation Selector</string>
+   </property>
+   <property name="toolTip">
+    <string>Helps select relations</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+L</string>
    </property>
   </action>
  </widget>

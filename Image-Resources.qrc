@@ -50,5 +50,10 @@
         <file>images/menu/Object/prop.png</file>
         <file>images/menu/Object/raise.png</file>
         <file>images/ucicon.png</file>
+        <file>images/items/bidirectional-connector.png</file>
+        <file>images/items/circle.png</file>
+        <file>images/items/rectangle.png</file>
+        <file>images/items/square.png</file>
+        <file>images/items/triangle.png</file>
     </qresource>
 </RCC>

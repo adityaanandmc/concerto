@@ -37,6 +37,7 @@ private:
     QSignalMapper *windowMapper;
 
     void connectMenuActions();
+    void connectToolBox(DiagramWindow *subWindow);
     DiagramWindow *activeSubWindow();
 };
 

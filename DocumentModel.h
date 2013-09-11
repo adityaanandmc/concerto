@@ -40,12 +40,12 @@ public:
 
     const IAuthor *getAuthor() const
     {
-        return theAuthor;
+        return theAuthor.get();
     }
 
     void setAuthor(const IAuthor *theAuthor)
     {
-        this->theAuthor = const_cast<IAuthor *>(theAuthor); // quirk; must for const-correctness
+        this->theAuthor.reset(const_cast<IAuthor *>(theAuthor)); // quirk; must for const-correctness
     }
 
     void addNode(const INode *theNode);
@@ -58,7 +58,7 @@ public:
 
 protected:
     GraphType theGraph;
-    IAuthor *theAuthor;
+    std::auto_ptr<IAuthor> theAuthor;
 
     vertex_iterator_t findNode(const INode *theNode);
     edge_iterator_t findRelation(const IRelation *theRelation);

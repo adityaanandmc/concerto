@@ -15,7 +15,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         concerto.cpp \
     diagramwindow.cpp \
-    DocumentModel.cpp
+    DocumentModel.cpp \
+    Diagram/DiagramItem.cpp \
+    Diagram/DiagramTextItem.cpp \
+    Diagram/Arrow.cpp \
+    Diagram/DiagramScene.cpp
 
 HEADERS  += concerto.h \
     diagramwindow.h \
@@ -57,7 +61,12 @@ HEADERS  += concerto.h \
     Relations/UsesRelation.h \
     Graph/Vertex.h \
     Graph/Edge.h \
-    Graph/DiagramInfo.h
+    Graph/DiagramInfo.h \
+    Diagram/DiagramItem.h \
+    Diagram/DiagramTextItem.h \
+    Diagram/Arrow.h \
+    Diagram/DiagramScene.h \
+    IObserver.h
 
 FORMS    += concerto.ui
 

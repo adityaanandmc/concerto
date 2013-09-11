@@ -26,19 +26,15 @@ Concerto::Concerto(QWidget *parent) :
         this, SLOT(setActiveSubWindow(QWidget *))
     );
 
-    IDocumentModel *model = new DocumentModel("Test", "A sample diagram");
-    qDebug("Created model!");
-    INode *thisNode = new ActorNode(), *thatNode = new UsecaseNode();
-    qDebug("Created nodes!");
-    IRelation *theRelation = new UnidirectionalAssociation();
-    qDebug("Created the relation!");
-    model->addNode(thisNode);
-    model->addNode(thatNode);
-    qDebug("Successfully added the nodes!");
-    model->relate(theRelation, thisNode, thatNode);
-    qDebug("Successfully related the nodes!");
-    delete model;
-    qDebug("Model destroyed!");
+    std::auto_ptr<IDocumentModel> model(new DocumentModel("Test", "A sample diagram"));
+    std::auto_ptr<INode> thisNode(new ActorNode()), thatNode(new UsecaseNode());
+    std::auto_ptr<IRelation> theRelation(new UnidirectionalAssociation());
+
+    model->addNode(thisNode.get());
+    model->addNode(thatNode.get());
+
+    model->relate(theRelation.get(), thisNode.get(), thatNode.get());
+    qDebug("Model set up successfully!");
 }
 
 Concerto::~Concerto()
@@ -78,9 +74,55 @@ void Concerto::connectMenuActions()
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(aboutAction()));
 }
 
+void Concerto::connectToolBox(DiagramWindow *subWindow)
+{
+    QSignalMapper *toolMapper = new QSignalMapper(subWindow);
+
+    // Actors, Usecases, Miscellaneous
+    connect(ui->addActorButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addUsecaseButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addSubFlowButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addAltFlowButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addSecFlowButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addSquareButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addRectangleButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addCircleButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+    connect(ui->addTriangleButton, SIGNAL(clicked()), toolMapper, SLOT(map()));
+
+    toolMapper->setMapping(ui->addActorButton, static_cast<int>(ActorType));
+    toolMapper->setMapping(ui->addUsecaseButton, static_cast<int>(UsecaseType));
+    toolMapper->setMapping(ui->addSubFlowButton, static_cast<int>(SubFlowType));
+    toolMapper->setMapping(ui->addAltFlowButton, static_cast<int>(AltFlowType));
+    toolMapper->setMapping(ui->addSecFlowButton, static_cast<int>(SecFlowType));
+    toolMapper->setMapping(ui->addSquareButton, static_cast<int>(GeomSquareType));
+    toolMapper->setMapping(ui->addRectangleButton, static_cast<int>(GeomRectangleType));
+    toolMapper->setMapping(ui->addCircleButton, static_cast<int>(GeomCircleType));
+    toolMapper->setMapping(ui->addTriangleButton, static_cast<int>(GeomTriangleType));
+
+    connect(toolMapper, SIGNAL(mapped(int)), subWindow, SLOT(setItemType(int)));
+
+    // Relations
+    QSignalMapper *relationsMapper = new QSignalMapper(subWindow);
+
+    connect(ui->addUnidirectionalAssociationButton, SIGNAL(clicked()), relationsMapper, SLOT(map()));
+    connect(ui->addBidirectionalAssociationButton, SIGNAL(clicked()), relationsMapper, SLOT(map()));
+    connect(ui->addExtensionPointButton, SIGNAL(clicked()), relationsMapper, SLOT(map()));
+    connect(ui->addUsesButton, SIGNAL(clicked()), relationsMapper, SLOT(map()));
+
+    relationsMapper->setMapping(ui->addUnidirectionalAssociationButton, static_cast<int>(UnidirectionalAssociationType));
+    relationsMapper->setMapping(ui->addBidirectionalAssociationButton, static_cast<int>(BidirectionalAssociationType));
+    relationsMapper->setMapping(ui->addExtensionPointButton, static_cast<int>(ExtensionPointType));
+    relationsMapper->setMapping(ui->addUsesButton, static_cast<int>(UsesType));
+
+    connect(relationsMapper, SIGNAL(mapped(int)), subWindow, SLOT(setLineType(int)));
+
+}
+
 void Concerto::newFileAction()
 {
     DiagramWindow *theChild = this->createMdiChild();
+
+    connectToolBox(theChild);
 
     theChild->show();
 }
@@ -89,7 +131,7 @@ void Concerto::aboutAction()
 {
     QMessageBox::about(this,
          tr("About useCase Designer"),
-         tr("<h1>useCaseDesigner</h1><h5>v0.1</h5><br /><br />"
+         tr("<h1>useCaseDesigner</h1><h5>v0.9.7</h5><br /><br />"
            "The <b>useCase Designer</b> is an interactive<br />"
            "use-case design tool, that visualizes software<br />"
            "complexity and calculates estimated costs.<br /><br />"
@@ -126,6 +168,11 @@ void Concerto::updateMenus()
     ui->action_Triangle->setEnabled(hasChildWindows);
     ui->action_Unidirectional->setEnabled(hasChildWindows);
     ui->action_Use_Case->setEnabled(hasChildWindows);
+    ui->action_Creator->setEnabled(hasChildWindows);
+    ui->action_Select->setEnabled(hasChildWindows);
+    ui->action_Move->setEnabled(hasChildWindows);
+    ui->action_Relation_Selector->setEnabled(hasChildWindows);
+    ui->action_Remove->setEnabled(hasChildWindows);
 }
 
 void Concerto::updateWindowMenu()
@@ -167,13 +214,13 @@ void Concerto::updateWindowMenu()
         action->setChecked(child == activeSubWindow());
 
         connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
-                windowMapper->setMapping(action, windows.at(i));
+        windowMapper->setMapping(action, windows.at(i));
     }
 }
 
 DiagramWindow *Concerto::createMdiChild()
 {
-    DiagramWindow *theChild = new DiagramWindow;
+    DiagramWindow *theChild = new DiagramWindow(ui->menu_Object);
 
     ui->mdiArea->addSubWindow(theChild);
 
