@@ -7,27 +7,27 @@
 #include "Relations/UsesRelation.h"
 
 #include "Identified.h"
-#include "Coloured.h"
+#include "Styled.h"
 #include "Positioned.h"
 
 typedef Identified<
             Positioned<
-                Coloured<
+                Styled<
                     UnidirectionalAssociationRelation > > > UnidirectionalAssociation;
 
 typedef Identified<
             Positioned<
-                Coloured<
+                Styled<
                     BidirectionalAssociationRelation > > > BidirectionalAssociation;
 
 typedef Identified<
             Positioned<
-                Coloured<
+                Styled<
                     ExtensionPointRelation > > > ExtensionPoint;
 
 typedef Identified<
             Positioned<
-                Coloured<
+                Styled<
                     UsesRelation > > > UsesAssociation;
 
 #endif // RELATIONDEFS_H

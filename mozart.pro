@@ -23,8 +23,6 @@ SOURCES += main.cpp\
 
 HEADERS  += concerto.h \
     diagramwindow.h \
-    IColourable.h \
-    Coloured.h \
     IPositionable.h \
     Positioned.h \
     IAttributable.h \
@@ -66,7 +64,12 @@ HEADERS  += concerto.h \
     Diagram/DiagramTextItem.h \
     Diagram/Arrow.h \
     Diagram/DiagramScene.h \
-    IObserver.h
+    NodeFactory.h \
+    RelationFactory.h \
+    ILabelizable.h \
+    Labelled.h \
+    IStylable.h \
+    Styled.h
 
 FORMS    += concerto.ui
 

@@ -1,12 +1,12 @@
 #ifndef COLOURED_H
 #define COLOURED_H
 
-#include "IColourable.h"
+#include "IStylable.h"
 
 #include <QColor>
 
 template <typename T>
-class Coloured : public IColourable, public T
+class Styled : public IStylable, public T
 {
 public:
 
@@ -58,9 +58,20 @@ public:
         return theBorderFill;
     }
 
+    const Font& GetFont() const
+    {
+        return theFont;
+    }
+
+    void SetFont(const Font& theFont)
+    {
+        this->theFont = theFont;
+    }
+
 private:
     Colour theFill;
     Colour theBorderFill;
+    Font theFont;
 };
 
 #endif // COLOURED_H

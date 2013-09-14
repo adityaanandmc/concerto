@@ -56,6 +56,10 @@ public:
 
     void breakUp(const IRelation *theRelation);
 
+    const INode *getNode(uint16_t theId) const;
+
+    INode *grabNode(uint16_t theId) const;
+
 protected:
     GraphType theGraph;
     std::auto_ptr<IAuthor> theAuthor;

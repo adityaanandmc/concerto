@@ -126,19 +126,19 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     painter->drawLine(line());
     painter->drawPolygon(theArrowHead);
 
-    if (BidirectionalAssociationType == theType) {
-        QPolygonF theOtherArrowHead;
-        theOtherArrowHead.clear();
-        theOtherArrowHead << line().p2() << arrowP1 << arrowP2;
-        painter->drawPolygon(theOtherArrowHead);
-    }
-
     if (isSelected()) {
         painter->setPen(QPen(theColour, 1, Qt::DashLine));
         QLineF mLine = line();
         mLine.translate(0, 4.0);
         painter->drawLine(mLine);
         mLine.translate(0,-8.0);
+        painter->drawLine(mLine);
+    }
+
+    if (BidirectionalAssociationType == theType) {
+        painter->setPen(QPen(theColour, 1, Qt::DashLine));
+        QLineF mLine = line();
+        mLine.translate(0, 4.0);
         painter->drawLine(mLine);
     }
 }

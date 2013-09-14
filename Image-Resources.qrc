@@ -55,5 +55,15 @@
         <file>images/items/rectangle.png</file>
         <file>images/items/square.png</file>
         <file>images/items/triangle.png</file>
+        <file>images/menu/View/zoom-fit-best.png</file>
+        <file>images/menu/View/zoom-in.png</file>
+        <file>images/menu/View/zoom-original.png</file>
+        <file>images/menu/View/zoom-out.png</file>
+        <file>images/menu/Format/edit-clear.svg</file>
+        <file>images/menu/Format/format-text-bold.png</file>
+        <file>images/menu/Format/format-text-italic.png</file>
+        <file>images/menu/Format/format-text-underline.png</file>
+        <file>images/menu/Format/preferences-desktop-font.png</file>
+        <file>images/dock/noise.png</file>
     </qresource>
 </RCC>

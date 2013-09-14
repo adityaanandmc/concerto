@@ -3,6 +3,12 @@
 
 #include <QTextCursor>
 #include <QGraphicsSceneMouseEvent>
+#include <QKeyEvent>
+
+#include "../NodeFactory.h"
+#include "../RelationFactory.h"
+
+int DiagramScene::theGeneration = 1;
 
 DiagramScene::DiagramScene(QMenu *theItemMenu, QObject *parent) :
     QGraphicsScene(parent)
@@ -87,7 +93,47 @@ void DiagramScene::editorLostFocus(DiagramTextItem *item)
     if (item->toPlainText().isEmpty()) {
         removeItem(item);
         item->deleteLater();
+    } else {
+        DiagramItem *theParent = dynamic_cast<DiagramItem *>(item->parentItem());
+        nodeNameChanged(theParent->getId(), item->toHtml());
     }
+}
+
+void DiagramScene::addNode(QPointF thePlace)
+{
+    DiagramItem *item;
+
+    item = new DiagramItem(theItemType, theItemMenu);
+    item->setBrush(theItemColor);
+    addItem(item);
+
+    item->setPos(thePlace);
+    item->setId(DiagramScene::theGeneration);
+
+    INode *theNode = NodeFactory::makeNode(theItemType);
+    item->setText(tr("Node %1").arg(DiagramScene::theGeneration));
+
+    connect(item->getText(), SIGNAL(lostFocus(DiagramTextItem*)), this, SLOT(editorLostFocus(DiagramTextItem*)));
+    connect(item->getText(), SIGNAL(selectedChange(DiagramTextItem*)), this, SLOT(nodeLabelPositionChanged(DiagramTextItem*)));
+
+    if (ILabelizable *mutator = dynamic_cast<ILabelizable *>(theNode)) {
+        mutator->setName(tr("Node %1").arg(DiagramScene::theGeneration).toStdString());
+    }
+
+    if (IStylable *mutator = dynamic_cast<IStylable *>(theNode)) {
+        mutator->SetFill(theItemColor);
+    }
+
+    if (IPositionable *mutator = dynamic_cast<IPositionable *>(theNode)) {
+        mutator->setPosition(thePlace.x(), thePlace.y());
+    }
+
+    if (IIdentifiable *mutator = dynamic_cast<IIdentifiable *>(theNode)) {
+        mutator->setId(DiagramScene::theGeneration);
+        ++theGeneration;
+    }
+
+    emit itemInserted(theNode);
 }
 
 void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -96,15 +142,9 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         return;
     }
 
-    DiagramItem *item;
     switch (theMode) {
     case InsertItem:
-        item = new DiagramItem(theItemType, theItemMenu);
-        item->setBrush(theItemColor);
-        addItem(item);
-
-        item->setPos(mouseEvent->scenePos());
-        emit itemInserted(item);
+        addNode(mouseEvent->scenePos());
         break;
 
     case InsertLine:
@@ -125,10 +165,10 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         addItem(textItem);
         textItem->setDefaultTextColor(theTextColor);
         textItem->setPos(mouseEvent->scenePos());
-        emit textInserted(textItem);
+        break;
 
     default:
-        break;
+        ;
     }
 
     QGraphicsScene::mousePressEvent(mouseEvent);
@@ -141,6 +181,7 @@ void DiagramScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
         line->setLine(newLine);
     } else if (theMode == MoveItem) {
         QGraphicsScene::mouseMoveEvent(mouseEvent);
+        emit itemsMayHaveMoved();
     }
 }
 
@@ -169,18 +210,50 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
             DiagramItem *startItem = qgraphicsitem_cast<DiagramItem *>(startItems.first());
             DiagramItem *endItem = qgraphicsitem_cast<DiagramItem *>(endItems.first());
-            Arrow *arrow = new Arrow(startItem, endItem, theLineType);
-            arrow->setColor(theLineColor);
-            startItem->addArrow(arrow);
-            endItem->addArrow(arrow);
-            arrow->setZValue(-1000.0);
-            addItem(arrow);
-            arrow->updatePosition();
+
+            bool isClear = true;
+
+            {
+                INode *tester = NodeFactory::makeNode(startItem->getType());
+
+                isClear = tester->relatableWith(endItem->getType());
+
+                delete tester;
+            }
+
+            if (isClear) {
+                Arrow *arrow = new Arrow(startItem, endItem, theLineType);
+                arrow->setColor(theLineColor);
+                startItem->addArrow(arrow);
+                endItem->addArrow(arrow);
+                arrow->setZValue(-1000.0);
+                addItem(arrow);
+                arrow->updatePosition();
+
+                IRelation *theRelation = RelationFactory::makeRelation(theLineType);
+
+                emit relationEstablished(startItem->getId(), endItem->getId(), theRelation);
+            }
         }
     }
 
     line = 0;
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
+}
+
+void DiagramScene::keyReleaseEvent(QKeyEvent *event)
+{
+    if (Qt::Key_Delete == event->key()) {
+        QList<QGraphicsItem *> items = selectedItems();
+
+        foreach (QGraphicsItem *anItem, items) {
+            if (Arrow *anArrow = dynamic_cast<Arrow *>(anItem)) {
+                emit relationBroken(anArrow->startItem()->getId(), anArrow->endItem()->getId());
+            } else if (DiagramItem *aNode = dynamic_cast<DiagramItem *>(anItem)) {
+                emit itemRemoved(aNode->getId());
+            }
+        }
+    }
 }
 
 bool DiagramScene::isItemChange(int type)
@@ -191,4 +264,15 @@ bool DiagramScene::isItemChange(int type)
         }
     }
     return false;
+}
+
+void DiagramScene::nodeNameChanged(const uint16_t theNodeId, const QString& theName)
+{
+    emit changeNodeName(theNodeId, theName);
+}
+
+void DiagramScene::nodeLabelPositionChanged(DiagramTextItem *item)
+{
+    DiagramItem *theParent = dynamic_cast<DiagramItem *>(item->parentItem());
+    emit changeLabelPosition(theParent->getId(), item->pos());
 }

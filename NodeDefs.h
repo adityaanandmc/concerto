@@ -14,56 +14,66 @@
 #include "Identified.h"
 #include "Attributed.h"
 #include "Positioned.h"
-#include "Coloured.h"
+#include "Styled.h"
+#include "Labelled.h"
 
 typedef Identified<
             Attributed<
-                Positioned<
-                    Coloured<
-                        UsecaseGraphNode > > > > UsecaseNode;
+                Labelled<
+                    Positioned<
+                        Styled<
+                            UsecaseGraphNode > > > > > UsecaseNode;
 
 typedef Identified<
             Attributed<
-                Positioned<
-                    Coloured<
-                        ActorGraphNode > > > > ActorNode;
+                Labelled<
+                    Positioned<
+                        Styled<
+                            UsecaseGraphNode > > > > > ActorNode;
 
 typedef Identified<
             Attributed<
-                Positioned<
-                    Coloured<
-                        SubFlowGraphNode > > > > SubFlowNode;
+                Labelled<
+                    Positioned<
+                        Styled<
+                            UsecaseGraphNode > > > > > SubFlowNode;
 
 typedef Identified<
             Attributed<
-                Positioned<
-                    Coloured<
-                        AltFlowGraphNode > > > > AltFlowNode;
+                Labelled<
+                    Positioned<
+                        Styled<
+                            UsecaseGraphNode > > > > > AltFlowNode;
 
 typedef Identified<
             Attributed<
+                Labelled<
+                    Positioned<
+                        Styled<
+                            UsecaseGraphNode > > > > > SecFlowNode;
+
+typedef Identified<
+            Labelled<
                 Positioned<
-                    Coloured<
-                        SecFlowGraphNode > > > > SecFlowNode;
+                    Styled<
+                        SquareGraphNode > > > > SquareNode;
 
 typedef Identified<
-            Positioned<
-                Coloured<
-                    SquareGraphNode > > > SquareNode;
+            Labelled<
+                Positioned<
+                    Styled<
+                        SquareGraphNode > > > > RectangleNode;
 
 typedef Identified<
-            Positioned<
-                Coloured<
-                    RectangleGraphNode > > > RectangleNode;
+            Labelled<
+                Positioned<
+                    Styled<
+                        SquareGraphNode > > > > CircleNode;
 
 typedef Identified<
-            Positioned<
-                Coloured<
-                    CircleGraphNode > > > CircleNode;
-
-typedef Identified<
-            Positioned<
-                Coloured<
-                    TriangleGraphNode > > > TriangleNode;
+            Labelled<
+                Positioned<
+                    Styled<
+                        SquareGraphNode > > > > TriangleNode;
 
 #endif // NODEDEFS_H

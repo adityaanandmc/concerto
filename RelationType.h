@@ -3,8 +3,6 @@
 
 typedef enum __RelationType
 {
-    UndefinedRelationType = 0x01,
-
     UnidirectionalAssociationType = 0x76,
     BidirectionalAssociationType,
     ExtensionPointType,

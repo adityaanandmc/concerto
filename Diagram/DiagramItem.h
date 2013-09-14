@@ -7,6 +7,7 @@
 #include "../NodeType.h"
 #include "Arrow.h"
 
+#include "../IIdentifiable.h"
 
 class QPixmap;
 class QGraphicsItem;
@@ -19,8 +20,9 @@ class QPainter;
 class QStyleOptionGraphicsItem;
 class QWidget;
 class QPolygonF;
+class DiagramTextItem;
 
-class DiagramItem : public QGraphicsPolygonItem
+class DiagramItem : public QGraphicsPolygonItem, public IIdentifiable
 {
 public:
     enum { Type = UserType + 15 };
@@ -46,17 +48,37 @@ public:
         return Type;
     }
 
+    void setText(const QString& theText);
+
     QPixmap getImage() const;
+
+    void setId(const uint16_t& theId)
+    {
+        this->theId = theId;
+    }
+
+    const uint16_t& getId() const
+    {
+        return theId;
+    }
+
+    const DiagramTextItem *getText() const
+    {
+        return theText;
+    }
 
 protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 private:
+    uint16_t theId;
     NodeType theType;
     QPolygonF thePolygon;
     QMenu *theMenu;
     QList<Arrow *> theArrows;
+
+    DiagramTextItem *theText;
 };
 
 #endif // DIAGRAMITEM_H

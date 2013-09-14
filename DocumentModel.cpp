@@ -1,4 +1,5 @@
 #include "DocumentModel.h"
+#include "IIdentifiable.h"
 
 DocumentModel::DocumentModel(const std::string &theTitle, const std::string &theDescription)
 {
@@ -61,6 +62,40 @@ void DocumentModel::breakUp(const IRelation *theRelation)
     }
 
     boost::remove_edge(*theEdge, theGraph);
+}
+
+const INode *DocumentModel::getNode(uint16_t theId) const
+{
+    vertex_iterator_t vi, vi_end, next;
+
+    boost::tie(vi, vi_end) = boost::vertices(theGraph);
+    for (next = vi; vi != vi_end; vi = next) {
+        ++next;
+        if (IIdentifiable *theNode = dynamic_cast<IIdentifiable *>(theGraph[*vi].theNode)) {
+            if (theId == theNode->getId()) {
+                return theGraph[*vi].theNode;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+INode *DocumentModel::grabNode(uint16_t theId) const
+{
+    vertex_iterator_t vi, vi_end, next;
+
+    boost::tie(vi, vi_end) = boost::vertices(theGraph);
+    for (next = vi; vi != vi_end; vi = next) {
+        ++next;
+        if (IIdentifiable *theNode = dynamic_cast<IIdentifiable *>(theGraph[*vi].theNode)) {
+            if (theId == theNode->getId()) {
+                return theGraph[*vi].theNode;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 vertex_iterator_t DocumentModel::findNode(const INode *theNode)

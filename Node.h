@@ -7,17 +7,11 @@
 class Node : public INode
 {
 public:
-    Node()
-    {
-        this->theType = UndefinedNodeType;
-    }
-
     virtual ~Node() {}
 
     bool canBeSentinel() const
     {
         switch (theType) {
-        case UndefinedNodeType:
         case UsecaseType:
         case ActorType:
         case GeomCircleType:
@@ -36,14 +30,42 @@ public:
         return false; // pretty much useless, but suppresses annoying warnings #gcc
     }
 
-    const std::string getName() const
+    bool relatableWith(const NodeType theOther) const
     {
-        return theName;
-    }
+        switch (theType) {
+        case UsecaseType:
+            switch (theOther) {
+            case UsecaseType:
+            case SubFlowType:
+            case AltFlowType:
+            case SecFlowType:
+                return true;
+            default:
+                return false;
+            }
+            break;
 
-    void setName(const std::string& theName)
-    {
-        this->theName = theName;
+        case ActorType:
+        case AltFlowType:
+        case SecFlowType:
+            switch (theOther) {
+            case UsecaseType:
+                return true;
+
+            default:
+                return false;
+            }
+            break;
+
+        case GeomCircleType:
+        case GeomRectangleType:
+        case GeomSquareType:
+        case GeomTriangleType:
+        default:
+            return false;
+        }
+
+        return false; // pretty much useless, but suppresses annoying warnings #gcc #again
     }
 
     const NodeType& getType() const
@@ -57,9 +79,7 @@ public:
     }
 
 protected:
-    NodeType theType;
-
-    std::string theName;
+    NodeType theType;\
 };
 
 #endif // NODE_H

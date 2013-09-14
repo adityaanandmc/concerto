@@ -5,6 +5,7 @@
 
 class DiagramWindow;
 class QSignalMapper;
+class QActionGroup;
 
 namespace Ui {
 class Concerto;
@@ -31,13 +32,26 @@ private slots:
     void setActiveSubWindow(QWidget *window);
     void switchLayoutDirection();
 
+    void updatePointer(QAction *theAction);
+    void cleanupSubWindow();
+
+    void nodeInsertFinished();
+
+    void toolSelected(int theType);
+    void lineTypeSelected(int theType);
+
 private:
     Ui::Concerto *ui;
 
     QSignalMapper *windowMapper;
+    QActionGroup *pointerGroup;
 
     void connectMenuActions();
     void connectToolBox(DiagramWindow *subWindow);
+    void connectPointers(DiagramWindow *subWindow);
+    void connectViewActions(DiagramWindow *subWindow);
+    void connectObjectActions(DiagramWindow *subWindow);
+    void connectToolActions(DiagramWindow *subWindow);
     DiagramWindow *activeSubWindow();
 };
 

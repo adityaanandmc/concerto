@@ -7,7 +7,6 @@
 
 #include "NodeDefs.h"
 #include "RelationDefs.h"
-#include "DocumentModel.h"
 
 Concerto::Concerto(QWidget *parent) :
     QMainWindow(parent),
@@ -25,16 +24,6 @@ Concerto::Concerto(QWidget *parent) :
         windowMapper, SIGNAL(mapped(QWidget *)),
         this, SLOT(setActiveSubWindow(QWidget *))
     );
-
-    std::auto_ptr<IDocumentModel> model(new DocumentModel("Test", "A sample diagram"));
-    std::auto_ptr<INode> thisNode(new ActorNode()), thatNode(new UsecaseNode());
-    std::auto_ptr<IRelation> theRelation(new UnidirectionalAssociation());
-
-    model->addNode(thisNode.get());
-    model->addNode(thatNode.get());
-
-    model->relate(theRelation.get(), thisNode.get(), thatNode.get());
-    qDebug("Model set up successfully!");
 }
 
 Concerto::~Concerto()
@@ -72,6 +61,20 @@ void Concerto::connectMenuActions()
 
     // Help Menu
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(aboutAction()));
+
+    // Pointer Menu
+    pointerGroup = new QActionGroup(ui->pointerToolBar);
+    pointerGroup->addAction(ui->action_Creator);
+    pointerGroup->addAction(ui->action_Relation_Selector);
+    pointerGroup->addAction(ui->action_Move);
+    pointerGroup->addAction(ui->action_Select);
+
+    ui->action_Creator->setData(DiagramScene::InsertItem);
+    ui->action_Relation_Selector->setData(DiagramScene::InsertLine);
+    ui->action_Move->setData(DiagramScene::MoveItem);
+    ui->action_Select->setData(DiagramScene::SelectItem);
+
+    connect(pointerGroup, SIGNAL(triggered(QAction*)), this, SLOT(updatePointer(QAction*)));
 }
 
 void Concerto::connectToolBox(DiagramWindow *subWindow)
@@ -118,11 +121,92 @@ void Concerto::connectToolBox(DiagramWindow *subWindow)
 
 }
 
+void Concerto::connectToolActions(DiagramWindow *subWindow)
+{
+    QSignalMapper *toolMapper = new QSignalMapper(subWindow);
+
+    // Actors, Usecases, Miscellaneous
+    connect(ui->actionAl_ternate_Flow, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->actionSub_Flow, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->actionSe_curity_Flow, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->action_Actor, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->action_Use_Case, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->action_Circle, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->action_Rectangle, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->action_Square, SIGNAL(triggered()), toolMapper, SLOT(map()));
+    connect(ui->action_Triangle, SIGNAL(triggered()), toolMapper, SLOT(map()));
+
+    toolMapper->setMapping(ui->action_Actor, static_cast<int>(ActorType));
+    toolMapper->setMapping(ui->action_Use_Case, static_cast<int>(UsecaseType));
+    toolMapper->setMapping(ui->actionSub_Flow, static_cast<int>(SubFlowType));
+    toolMapper->setMapping(ui->actionAl_ternate_Flow, static_cast<int>(AltFlowType));
+    toolMapper->setMapping(ui->actionSe_curity_Flow, static_cast<int>(SecFlowType));
+    toolMapper->setMapping(ui->action_Square, static_cast<int>(GeomSquareType));
+    toolMapper->setMapping(ui->action_Rectangle, static_cast<int>(GeomRectangleType));
+    toolMapper->setMapping(ui->action_Circle, static_cast<int>(GeomCircleType));
+    toolMapper->setMapping(ui->action_Triangle, static_cast<int>(GeomTriangleType));
+
+    connect(toolMapper, SIGNAL(mapped(int)), this, SLOT(toolSelected(int)));
+
+    // Relations
+    QSignalMapper *relationsMapper = new QSignalMapper(subWindow);
+
+    connect(ui->action_Unidirectional, SIGNAL(triggered()), relationsMapper, SLOT(map()));
+    connect(ui->action_Bidirectional, SIGNAL(triggered()), relationsMapper, SLOT(map()));
+    connect(ui->actionUses, SIGNAL(triggered()), relationsMapper, SLOT(map()));
+    connect(ui->actionE_xtension_Point, SIGNAL(triggered()), relationsMapper, SLOT(map()));
+
+    relationsMapper->setMapping(ui->action_Unidirectional, static_cast<int>(UnidirectionalAssociationType));
+    relationsMapper->setMapping(ui->action_Bidirectional, static_cast<int>(BidirectionalAssociationType));
+    relationsMapper->setMapping(ui->actionE_xtension_Point, static_cast<int>(ExtensionPointType));
+    relationsMapper->setMapping(ui->actionUses, static_cast<int>(UsesType));
+
+    connect(relationsMapper, SIGNAL(mapped(int)), this, SLOT(lineTypeSelected(int)));
+}
+
+void Concerto::connectPointers(DiagramWindow *subWindow)
+{
+    QSignalMapper *pointerMapper = new QSignalMapper(subWindow);
+
+    connect(ui->action_Creator, SIGNAL(toggled(bool)), pointerMapper, SLOT(map()));
+    connect(ui->action_Relation_Selector, SIGNAL(toggled(bool)), pointerMapper, SLOT(map()));
+    connect(ui->action_Move, SIGNAL(toggled(bool)), pointerMapper, SLOT(map()));
+    connect(ui->action_Select, SIGNAL(toggled(bool)), pointerMapper, SLOT(map()));
+
+    pointerMapper->setMapping(ui->action_Creator, static_cast<int>(DiagramScene::InsertItem));
+    pointerMapper->setMapping(ui->action_Relation_Selector, static_cast<int>(DiagramScene::InsertLine));
+    pointerMapper->setMapping(ui->action_Move, static_cast<int>(DiagramScene::MoveItem));
+    pointerMapper->setMapping(ui->action_Select, static_cast<int>(DiagramScene::SelectItem));
+
+    connect(pointerMapper, SIGNAL(mapped(int)), subWindow, SLOT(setMode(int)));
+
+    connect(subWindow, SIGNAL(nodeInserted()), this, SLOT(nodeInsertFinished()));
+}
+
+void Concerto::connectViewActions(DiagramWindow *subWindow)
+{
+    connect(ui->actionZoom_In, SIGNAL(triggered()), subWindow, SLOT(zoomIn()));
+    connect(ui->actionZoom_Out, SIGNAL(triggered()), subWindow, SLOT(zoomOut()));
+    connect(ui->action_Normal, SIGNAL(triggered()), subWindow, SLOT(resetZoom()));
+    connect(ui->action_Fit_to_Window, SIGNAL(triggered()), subWindow, SLOT(fitWindow()));
+}
+
+void Concerto::connectObjectActions(DiagramWindow *subWindow)
+{
+    connect(ui->action_Remove, SIGNAL(triggered()), subWindow, SLOT(deleteSelectedItem()));
+}
+
 void Concerto::newFileAction()
 {
     DiagramWindow *theChild = this->createMdiChild();
 
     connectToolBox(theChild);
+    connectPointers(theChild);
+    connectViewActions(theChild);
+    connectObjectActions(theChild);
+    connectToolActions(theChild);
+
+    connect(theChild, SIGNAL(destroyed()), this, SLOT(cleanupSubWindow()));
 
     theChild->show();
 }
@@ -173,6 +257,11 @@ void Concerto::updateMenus()
     ui->action_Move->setEnabled(hasChildWindows);
     ui->action_Relation_Selector->setEnabled(hasChildWindows);
     ui->action_Remove->setEnabled(hasChildWindows);
+    ui->action_Properties->setEnabled(hasChildWindows);
+    ui->actionZoom_In->setEnabled(hasChildWindows);
+    ui->actionZoom_Out->setEnabled(hasChildWindows);
+    ui->action_Normal->setEnabled(hasChildWindows);
+    ui->action_Fit_to_Window->setEnabled(hasChildWindows);
 }
 
 void Concerto::updateWindowMenu()
@@ -215,6 +304,58 @@ void Concerto::updateWindowMenu()
 
         connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
         windowMapper->setMapping(action, windows.at(i));
+    }
+}
+
+void Concerto::updatePointer(QAction *theAction)
+{
+    switch (static_cast<DiagramScene::Mode>(theAction->data().toInt())) {
+    case DiagramScene::InsertItem:
+        setCursor(Qt::PointingHandCursor);
+        break;
+
+    case DiagramScene::InsertLine:
+        setCursor(Qt::SizeBDiagCursor);
+        break;
+
+    case DiagramScene::MoveItem:
+        setCursor(Qt::SizeAllCursor);
+        break;
+
+    case DiagramScene::SelectItem:
+        setCursor(Qt::ArrowCursor);
+        break;
+
+    default:
+        ;
+    }
+}
+
+void Concerto::nodeInsertFinished()
+{
+    pointerGroup->actions().at(2)->setChecked(true);
+    setCursor(Qt::SizeAllCursor);
+}
+
+void Concerto::toolSelected(int theType)
+{
+    activeSubWindow()->setItemType(theType);
+    pointerGroup->actions().at(0)->setChecked(true);
+    setCursor(Qt::PointingHandCursor);
+}
+
+void Concerto::lineTypeSelected(int theType)
+{
+    activeSubWindow()->setLineType(theType);
+    pointerGroup->actions().at(1)->setChecked(true);
+    setCursor(Qt::SizeBDiagCursor);
+}
+
+void Concerto::cleanupSubWindow()
+{
+    setCursor(Qt::ArrowCursor);
+    if (QAction *action = pointerGroup->checkedAction()) {
+        action->setChecked(false);
     }
 }
 

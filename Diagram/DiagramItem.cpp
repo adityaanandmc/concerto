@@ -1,4 +1,5 @@
 #include "DiagramItem.h"
+#include "DiagramTextItem.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
@@ -6,7 +7,7 @@
 #include <QPainter>
 
 DiagramItem::DiagramItem(NodeType theType, QMenu *theMenu, QGraphicsItem *theParent)
-    : QGraphicsPolygonItem(theParent)
+    : QGraphicsPolygonItem(theParent), theText(new DiagramTextItem(this))
 {
     this->theType = theType;
     this->theMenu = theMenu;
@@ -36,45 +37,62 @@ DiagramItem::DiagramItem(NodeType theType, QMenu *theMenu, QGraphicsItem *thePar
         path.arcTo(-15, 110, 20, 20, 270, -90);
         path.lineTo(-15, 70);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Actor"));
         break;
 
     case UsecaseType:
         path.addEllipse(-100, -50, 200, 100);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Usecase"));
         break;
 
     case SubFlowType:
+        setPen(QPen(Qt::black, 10));
         path.addEllipse(-25, -25, 50, 50);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Sub Flow"));
         break;
 
     case AltFlowType:
+        setPen(QPen(Qt::black, 5, Qt::DashLine));
         path.addEllipse(-25, -25, 50, 50);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Alternate Flow"));
         break;
 
     case SecFlowType:
+        setPen(QPen(Qt::black, 5, Qt::DashDotDotLine));
         path.addEllipse(-25, -25, 50, 50);
+        setPen(QPen(Qt::black, 2));
+        path.addEllipse(-15, -15, 30, 30);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Security Flow"));
         break;
 
     case GeomSquareType:
+        setPen(QPen(Qt::black, 6));
         path.addRect(-50, -50, 100, 100);
+        setPen(QPen(Qt::black, 2));
+        path.addRect(-45, -45, 90, 90);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Square Note"));
         break;
 
     case GeomRectangleType:
         path.addRect(-100, -50, 200, 100);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Rectangle Note"));
         break;
 
     case GeomCircleType:
         path.addEllipse(-50, -50, 100, 100);
         thePolygon = path.toFillPolygon();
+        setToolTip(QString("Circle Note"));
         break;
 
     case GeomTriangleType:
         thePolygon << QPointF(-60, 50) << QPointF(0, -50) << QPointF(60, 50) << QPointF(-60, 50);
+        setToolTip(QString("Tirangle Note"));
         break;
 
     default:
@@ -111,6 +129,11 @@ void DiagramItem::removeArrows()
 void DiagramItem::addArrow(Arrow *arrow)
 {
     theArrows.append(arrow);
+}
+
+void DiagramItem::setText(const QString& theText)
+{
+    this->theText->setPlainText(theText);
 }
 
 QPixmap DiagramItem::getImage() const
