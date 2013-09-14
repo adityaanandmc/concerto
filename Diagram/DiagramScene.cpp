@@ -241,21 +241,6 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
-void DiagramScene::keyReleaseEvent(QKeyEvent *event)
-{
-    if (Qt::Key_Delete == event->key()) {
-        QList<QGraphicsItem *> items = selectedItems();
-
-        foreach (QGraphicsItem *anItem, items) {
-            if (Arrow *anArrow = dynamic_cast<Arrow *>(anItem)) {
-                emit relationBroken(anArrow->startItem()->getId(), anArrow->endItem()->getId());
-            } else if (DiagramItem *aNode = dynamic_cast<DiagramItem *>(anItem)) {
-                emit itemRemoved(aNode->getId());
-            }
-        }
-    }
-}
-
 bool DiagramScene::isItemChange(int type)
 {
     foreach (QGraphicsItem *item, selectedItems()) {

@@ -98,17 +98,36 @@ void DiagramWindow::resetZoom()
 
 void DiagramWindow::deleteSelectedItem()
 {
-    QGraphicsItem *item = theScene->selectedItems()[0];
+    QList<QGraphicsItem *> items = theScene->selectedItems();
 
-    uint16_t theId = 0;
-    if (DiagramItem *it = dynamic_cast<DiagramItem *>(item)) {
-        theId = it->getId();
+    foreach (QGraphicsItem *item, items) {
+         if (Arrow *arrow = dynamic_cast<Arrow *>(item)) {
+            const INode *thisNode = theModel->getNode(arrow->startItem()->getId()),
+                        *thatNode = theModel->getNode(arrow->endItem()->getId());
+
+            if (thisNode && thatNode) {
+                const IRelation *theRelation = theModel->getRelation(thisNode, thatNode);
+
+                if (theRelation) {
+                    theModel->breakUp(theRelation);
+                    theScene->removeItem(item);
+                }
+            }
+        }
     }
 
-    theScene->removeItem(item);
+    items.clear();
 
-    const INode *theNode = theModel->getNode(theId);
-    theModel->removeNode(theNode);
+    items = theScene->selectedItems();
+
+    foreach (QGraphicsItem *item, items) {
+        if (DiagramItem *it = dynamic_cast<DiagramItem *>(item)) {
+            const INode *theNode = theModel->getNode(it->getId());
+
+            theModel->removeNode(theNode);
+            theScene->removeItem(item);
+        }
+    }
 }
 
 void DiagramWindow::documentWasModified()

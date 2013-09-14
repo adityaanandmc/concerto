@@ -25,6 +25,10 @@ struct IDocumentModel : public IDiagram
     virtual const INode *getNode(uint16_t theId) const = 0;
 
     virtual INode *grabNode(uint16_t theId) const = 0;
+
+    virtual const IRelation *getRelation(const INode *thisNode, const INode *thatNode) = 0;
+
+    virtual IRelation *grabRelation(const INode *thisNode, const INode *thatNode) = 0;
 };
 
 #endif // IDOCUMENTMODEL_H

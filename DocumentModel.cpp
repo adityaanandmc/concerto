@@ -98,6 +98,38 @@ INode *DocumentModel::grabNode(uint16_t theId) const
     return NULL;
 }
 
+const IRelation *DocumentModel::getRelation(const INode *thisNode, const INode *thatNode)
+{
+    edge_t theEdge;
+    bool status;
+
+    vertex_t thisVertex = *findNode(thisNode), thatVertex = *findNode(thatNode);
+
+    boost::tie(theEdge, status) = boost::edge(thisVertex, thatVertex, theGraph);
+
+    if (true == status) {
+        return theGraph[theEdge].theRelation;
+    }
+
+    return NULL;
+}
+
+IRelation *DocumentModel::grabRelation(const INode *thisNode, const INode *thatNode)
+{
+    edge_t theEdge;
+    bool status;
+
+    vertex_t thisVertex = *findNode(thisNode), thatVertex = *findNode(thatNode);
+
+    boost::tie(theEdge, status) = boost::edge(thisVertex, thatVertex, theGraph);
+
+    if (true == status) {
+        return theGraph[theEdge].theRelation;
+    }
+
+    return NULL;
+}
+
 vertex_iterator_t DocumentModel::findNode(const INode *theNode)
 {
     vertex_iterator_t vi, vi_end, next;

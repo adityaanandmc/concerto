@@ -60,6 +60,10 @@ public:
 
     INode *grabNode(uint16_t theId) const;
 
+    const IRelation *getRelation(const INode *thisNode, const INode *thatNode);
+
+    IRelation *grabRelation(const INode *thisNode, const INode *thatNode);
+
 protected:
     GraphType theGraph;
     std::auto_ptr<IAuthor> theAuthor;

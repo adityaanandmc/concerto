@@ -45,8 +45,6 @@ signals:
     void changeNodeName(const uint16_t theNodeId, const QString& theName);
     void changeLabelPosition(const uint16_t theNodeId, const QPointF& thePosition);
     void itemsMayHaveMoved();
-    void relationBroken(const uint16_t thisNodeId, const uint16_t thatNodeId);
-    void itemRemoved(const uint16_t theNodeId);
     
 public slots:
     void setMode(Mode mode);
@@ -62,7 +60,6 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void keyReleaseEvent(QKeyEvent *event);
 
 private:
     bool isItemChange(int type);
