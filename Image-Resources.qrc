@@ -65,5 +65,7 @@
         <file>images/menu/Format/format-text-underline.png</file>
         <file>images/menu/Format/preferences-desktop-font.png</file>
         <file>images/dock/noise.png</file>
+        <file>images/toolbar/format/arrow_down.png</file>
+        <file>images/toolbar/format/arrow_down_white.png</file>
     </qresource>
 </RCC>

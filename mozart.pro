@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     Diagram/DiagramItem.cpp \
     Diagram/DiagramTextItem.cpp \
     Diagram/Arrow.cpp \
-    Diagram/DiagramScene.cpp
+    Diagram/DiagramScene.cpp \
+    TinyXML/tinyxml2.cpp \
+    ModelMapper.cpp
 
 HEADERS  += concerto.h \
     diagramwindow.h \
@@ -69,7 +71,11 @@ HEADERS  += concerto.h \
     ILabelizable.h \
     Labelled.h \
     IStylable.h \
-    Styled.h
+    Styled.h \
+    TinyXML/tinyxml2.h \
+    IModelMapper.h \
+    ModelMapper.h \
+    StdStringUtil.h
 
 FORMS    += concerto.ui
 

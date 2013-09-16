@@ -18,6 +18,8 @@ public:
 
     QString getTitle() const;
 
+    void save(const QString& path);
+
 protected:
     void closeEvent(QCloseEvent *event);
     virtual void wheelEvent(QWheelEvent* event);
@@ -26,16 +28,26 @@ protected:
 
 signals:
     void nodeInserted();
+    void contextMenuDisable();
+    void contextMenuEnable();
+    void formatMenuDisable();
+    void formatMenuEnable();
+    void formatFontSettingsChange(const QFont);
 
 public slots:
     void setItemType(int theItemType);
     void setLineType(int theLineType);
     void setMode(int theMode);
+    void setFont(const QFont& theFont);
     void zoomIn();
     void zoomOut();
     void fitWindow();
     void resetZoom();
     void deleteSelectedItem();
+    void bringForward();
+    void sendBackward();
+    void imbueFillColour(const QColor& theColour);
+    void imbueLineColour(const QColor& theColour);
     
 private slots:
     void documentWasModified();
@@ -45,6 +57,9 @@ private slots:
     void nodeNameChanged(const uint16_t theNodeId, const QString& theText);
     void labelPositionChanged(const uint16_t theNodeId, const QPointF& thePosition);
     void nodePositionsMayHaveChanged();
+
+    void handleSelectionChanged();
+    void handleFormatStateChange(bool theState);
 
 private:
     DiagramScene *theScene;

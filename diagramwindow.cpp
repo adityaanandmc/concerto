@@ -1,8 +1,10 @@
 #include <QtWidgets>
 #include "diagramwindow.h"
 #include "DocumentModel.h"
+#include "ModelMapper.h"
 #include "ILabelizable.h"
 #include "IPositionable.h"
+#include "IStylable.h"
 
 int DiagramWindow::theGeneration = 1;
 
@@ -26,6 +28,8 @@ DiagramWindow::DiagramWindow(QMenu *theObjectMenu)
     connect(theScene, SIGNAL(changeNodeName(uint16_t,QString)), this, SLOT(nodeNameChanged(uint16_t,QString)));
     connect(theScene, SIGNAL(changeLabelPosition(uint16_t,QPointF)), this, SLOT(labelPositionChanged(uint16_t,QPointF)));
     connect(theScene, SIGNAL(itemsMayHaveMoved()), this, SLOT(nodePositionsMayHaveChanged()));
+    connect(theScene, SIGNAL(selectionChanged()), this, SLOT(handleSelectionChanged()));
+    connect(theScene, SIGNAL(formatStateChanged(bool)), this, SLOT(handleFormatStateChange(bool)));
 
     theZoomLevel = 1;
 
@@ -98,9 +102,7 @@ void DiagramWindow::resetZoom()
 
 void DiagramWindow::deleteSelectedItem()
 {
-    QList<QGraphicsItem *> items = theScene->selectedItems();
-
-    foreach (QGraphicsItem *item, items) {
+    foreach (QGraphicsItem *item, theScene->selectedItems()) {
          if (Arrow *arrow = dynamic_cast<Arrow *>(item)) {
             const INode *thisNode = theModel->getNode(arrow->startItem()->getId()),
                         *thatNode = theModel->getNode(arrow->endItem()->getId());
@@ -111,22 +113,75 @@ void DiagramWindow::deleteSelectedItem()
                 if (theRelation) {
                     theModel->breakUp(theRelation);
                     theScene->removeItem(item);
+                    delete item;
                 }
             }
         }
     }
 
-    items.clear();
-
-    items = theScene->selectedItems();
-
-    foreach (QGraphicsItem *item, items) {
+    foreach (QGraphicsItem *item, theScene->selectedItems()) {
         if (DiagramItem *it = dynamic_cast<DiagramItem *>(item)) {
             const INode *theNode = theModel->getNode(it->getId());
 
             theModel->removeNode(theNode);
+            it->removeArrows();
             theScene->removeItem(item);
+            delete item;
         }
+    }
+}
+
+void DiagramWindow::bringForward()
+{
+    if (theScene->selectedItems().isEmpty())
+        return;
+
+    QList<QGraphicsItem *> overlapItems;
+
+    qreal zValue = 0, refZValue = 0;
+
+    foreach (QGraphicsItem *it, theScene->selectedItems()) {
+        if (it->zValue() > refZValue) {
+            refZValue = it->zValue();
+        }
+
+        overlapItems += it->collidingItems();
+    }
+
+    foreach (QGraphicsItem *item, overlapItems) {
+        if (refZValue >= zValue/* && item->type() == DiagramItem::Type*/)
+            zValue = item->zValue() + 0.1;
+    }
+
+    foreach (QGraphicsItem *it, theScene->selectedItems()) {
+        it->setZValue(zValue);
+    }
+}
+
+void DiagramWindow::sendBackward()
+{
+    if (theScene->selectedItems().isEmpty())
+        return;
+
+    QList<QGraphicsItem *> overlapItems;
+
+    qreal zValue = 0, refZValue = 0;
+
+    foreach (QGraphicsItem *it, theScene->selectedItems()) {
+        if (it->zValue() < refZValue) {
+            refZValue = it->zValue();
+        }
+
+        overlapItems += it->collidingItems();
+    }
+
+    foreach (QGraphicsItem *item, overlapItems) {
+        if (refZValue <= zValue/* && item->type() == DiagramItem::Type*/)
+            zValue = item->zValue() - 0.1;
+    }
+
+    foreach (QGraphicsItem *it, theScene->selectedItems()) {
+        it->setZValue(zValue);
     }
 }
 
@@ -153,6 +208,41 @@ void DiagramWindow::setLineType(int theLineType)
 void DiagramWindow::setMode(int theMode)
 {
     theScene->setMode(static_cast<DiagramScene::Mode>(theMode));
+}
+
+void DiagramWindow::setFont(const QFont& theFont)
+{
+    theScene->setFont(theFont);
+}
+
+void DiagramWindow::imbueFillColour(const QColor &theColour)
+{
+    theScene->setItemColour(theColour);
+
+    foreach (QGraphicsItem *anItem, theScene->selectedItems()) {
+        if (DiagramItem *item = dynamic_cast<DiagramItem *>(anItem)) {
+            INode *theNode = theModel->grabNode(item->getId());
+
+            if (IStylable *theStyler = dynamic_cast<IStylable *>(theNode)) {
+                theStyler->SetFill(theColour);
+            }
+        }
+    }
+}
+
+void DiagramWindow::imbueLineColour(const QColor &theColour)
+{
+    theScene->setLineColour(theColour);
+
+    foreach (QGraphicsItem *anItem, theScene->selectedItems()) {
+        if (DiagramItem *item = dynamic_cast<DiagramItem *>(anItem)) {
+            INode *theNode = theModel->grabNode(item->getId());
+
+            if (IStylable *theStyler = dynamic_cast<IStylable *>(theNode)) {
+                theStyler->SetBorderFill(theColour);
+            }
+        }
+    }
 }
 
 void DiagramWindow::nodeAdded(const INode *theNode)
@@ -200,6 +290,45 @@ void DiagramWindow::nodePositionsMayHaveChanged()
 
             if (IPositionable *thePositioner = dynamic_cast<IPositionable *>(theNode)) {
                 thePositioner->setPosition(thisItem->x(), thisItem->y(), thisItem->zValue());
+            }
+        }
+    }
+}
+
+void DiagramWindow::save(const QString& path)
+{
+    ModelMapper theMapper;
+    bool fFlag = true;
+
+    theMapper.save(path.toStdString(), theModel.get(), fFlag);
+}
+
+void DiagramWindow::handleSelectionChanged()
+{
+    QList<QGraphicsItem *> items = theScene->selectedItems();
+
+    if (items.count() == 0) {
+        emit contextMenuDisable();
+    } else {
+        emit contextMenuEnable();
+    }
+}
+
+void DiagramWindow::handleFormatStateChange(bool theState)
+{
+    if (false == theState) {
+        emit formatMenuDisable();
+    } else {
+        emit formatMenuEnable();
+
+        // Check for the font under text cursor
+        if (theScene->selectedItems().count()) {
+            if (QGraphicsTextItem *item = dynamic_cast<QGraphicsTextItem *>(theScene->selectedItems().first())) {
+                QTextCursor cursor = item->textCursor();
+
+                if (cursor.hasSelection()) {
+                    emit formatFontSettingsChange(cursor.charFormat().font());
+                }
             }
         }
     }

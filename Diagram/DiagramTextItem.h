@@ -20,11 +20,13 @@ public:
 signals:
     void lostFocus(DiagramTextItem *item);
     void selectedChange(DiagramTextItem *item);
+    void gainedFocus(DiagramTextItem *item);
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void focusOutEvent(QFocusEvent *event);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void focusInEvent(QFocusEvent *event);
 };
 
 #endif // DIAGRAMTEXTITEM_H

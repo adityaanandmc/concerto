@@ -14,7 +14,8 @@ Concerto::Concerto(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->connectMenuActions();
+    connectMenuActions();
+    connectToolbars();
 
     connect(ui->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
 
@@ -52,6 +53,8 @@ void Concerto::connectMenuActions()
     // View Menu
     connect(ui->actionS_witch_Layout_Direction, SIGNAL(triggered()), this, SLOT(switchLayoutDirection()));
 
+    // Format Menu
+
     // Tools Menu
 
     // Object Menu
@@ -75,6 +78,48 @@ void Concerto::connectMenuActions()
     ui->action_Select->setData(DiagramScene::SelectItem);
 
     connect(pointerGroup, SIGNAL(triggered(QAction*)), this, SLOT(updatePointer(QAction*)));
+}
+
+void Concerto::connectToolbars()
+{
+    // Format Toolbar
+    fontCombo = new QFontComboBox();
+    connect(fontCombo, SIGNAL(currentFontChanged(QFont)),
+            this, SLOT(currentFontChanged(QFont)));
+
+    connect(ui->action_Boldify, SIGNAL(triggered(bool)), this, SLOT(boldify(bool)));
+    connect(ui->action_Underline, SIGNAL(triggered(bool)), this, SLOT(underline(bool)));
+    connect(ui->action_Italicize, SIGNAL(triggered(bool)), this, SLOT(italicize(bool)));
+
+    fBold = fItalic = fUnderline = false;
+
+    fillColourToolButton = new QToolButton(ui->formatToolBar);
+    fillColourToolButton->setPopupMode(QToolButton::MenuButtonPopup);
+    fillColourToolButton->setMenu(createColourPickerMenu(SLOT(fillColourChanged()), Qt::white));
+    fillAction = fillColourToolButton->menu()->defaultAction();
+    fillColourToolButton->setIcon(createColourIndicator(tr(":/icons/images/toolbar/format/paint.png"), Qt::white));
+    connect(fillColourToolButton, SIGNAL(clicked()), this, SLOT(fillColourButtonTriggered()));
+    fillColourToolButton->setEnabled(false);
+
+    lineColourToolButton = new QToolButton(ui->formatToolBar);
+    lineColourToolButton->setPopupMode(QToolButton::MenuButtonPopup);
+    lineColourToolButton->setMenu(createColourPickerMenu(SLOT(lineColourChanged()), Qt::black));
+    lineAction = lineColourToolButton->menu()->defaultAction();
+    lineColourToolButton->setIcon(createColourIndicator(tr(":/icons/images/toolbar/format/linecolour.png"), Qt::black));
+    connect(lineColourToolButton, SIGNAL(clicked()), this, SLOT(lineColourButtonTriggered()));
+    lineColourToolButton->setEnabled(false);
+
+    // re-create the format toolbar
+    ui->formatToolBar->clear();
+    ui->formatToolBar->addWidget(fillColourToolButton);
+    ui->formatToolBar->addWidget(lineColourToolButton);
+    ui->formatToolBar->addSeparator();
+    ui->formatToolBar->addWidget(fontCombo);
+    ui->formatToolBar->addAction(ui->action_Boldify);
+    ui->formatToolBar->addAction(ui->action_Italicize);
+    ui->formatToolBar->addAction(ui->action_Underline);
+    ui->formatToolBar->addSeparator();
+    fontCombo->setEnabled(false);
 }
 
 void Concerto::connectToolBox(DiagramWindow *subWindow)
@@ -102,7 +147,7 @@ void Concerto::connectToolBox(DiagramWindow *subWindow)
     toolMapper->setMapping(ui->addCircleButton, static_cast<int>(GeomCircleType));
     toolMapper->setMapping(ui->addTriangleButton, static_cast<int>(GeomTriangleType));
 
-    connect(toolMapper, SIGNAL(mapped(int)), subWindow, SLOT(setItemType(int)));
+    connect(toolMapper, SIGNAL(mapped(int)), this, SLOT(toolSelected(int)));
 
     // Relations
     QSignalMapper *relationsMapper = new QSignalMapper(subWindow);
@@ -117,7 +162,7 @@ void Concerto::connectToolBox(DiagramWindow *subWindow)
     relationsMapper->setMapping(ui->addExtensionPointButton, static_cast<int>(ExtensionPointType));
     relationsMapper->setMapping(ui->addUsesButton, static_cast<int>(UsesType));
 
-    connect(relationsMapper, SIGNAL(mapped(int)), subWindow, SLOT(setLineType(int)));
+    connect(relationsMapper, SIGNAL(mapped(int)), this, SLOT(lineTypeSelected(int)));
 
 }
 
@@ -194,6 +239,23 @@ void Concerto::connectViewActions(DiagramWindow *subWindow)
 void Concerto::connectObjectActions(DiagramWindow *subWindow)
 {
     connect(ui->action_Remove, SIGNAL(triggered()), subWindow, SLOT(deleteSelectedItem()));
+    connect(ui->actionSend_Forward, SIGNAL(triggered()), subWindow, SLOT(bringForward()));
+    connect(ui->actionSend_Backward, SIGNAL(triggered()), subWindow, SLOT(sendBackward()));
+
+    connect(subWindow, SIGNAL(contextMenuDisable()), this, SLOT(disableContextMenuObject()));
+    connect(subWindow, SIGNAL(contextMenuEnable()), this, SLOT(enableContextMenuObject()));
+}
+
+void Concerto::connectFormatActions(DiagramWindow *subWindow)
+{
+    connect(subWindow, SIGNAL(formatMenuDisable()), this, SLOT(disableFormatMenu()));
+    connect(subWindow, SIGNAL(formatMenuEnable()), this, SLOT(enableFormatMenu()));
+    connect(subWindow, SIGNAL(formatFontSettingsChange(QFont)), this, SLOT(reactToFontChange(QFont)));
+}
+
+void Concerto::connectFileActions(DiagramWindow *subWindow)
+{
+    connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(saveTriggered()));
 }
 
 void Concerto::newFileAction()
@@ -205,6 +267,8 @@ void Concerto::newFileAction()
     connectViewActions(theChild);
     connectObjectActions(theChild);
     connectToolActions(theChild);
+    connectFormatActions(theChild);
+    connectFileActions(theChild);
 
     connect(theChild, SIGNAL(destroyed()), this, SLOT(cleanupSubWindow()));
 
@@ -214,11 +278,11 @@ void Concerto::newFileAction()
 void Concerto::aboutAction()
 {
     QMessageBox::about(this,
-         tr("About useCase Designer"),
-         tr("<h1>useCaseDesigner</h1><h5>v0.9.7</h5><br /><br />"
-           "The <b>useCase Designer</b> is an interactive<br />"
-           "use-case design tool, that visualizes software<br />"
-           "complexity and calculates estimated costs.<br /><br />"
+         tr("About Concerto"),
+         tr("<h1>Concerto</h1><h5>v0.9.7 - Mozart</h5><br /><br />"
+           "<strong>Concerto</strong> is an interactive "
+           "use-case design<br />tool, that visualizes software"
+           "complexity<br />and calculates estimated costs.<br /><br />"
            "<center><i>Based on Original Research By</i><br />Prof. Sathis Kumar<br /><br />"
            "<i>Programmed By:</i><br />S. Amrith Nayak</center>"));
 }
@@ -233,8 +297,6 @@ void Concerto::updateMenus()
     ui->actionE_xtension_Point->setEnabled(hasChildWindows);
     ui->actionP_roperties->setEnabled(hasChildWindows);
     ui->actionSave_As->setEnabled(hasChildWindows);
-    ui->actionSend_Backward->setEnabled(hasChildWindows);
-    ui->actionSend_Forward->setEnabled(hasChildWindows);
     ui->actionSe_curity_Flow->setEnabled(hasChildWindows);
     ui->actionSub_Flow->setEnabled(hasChildWindows);
     ui->actionUses->setEnabled(hasChildWindows);
@@ -256,12 +318,12 @@ void Concerto::updateMenus()
     ui->action_Select->setEnabled(hasChildWindows);
     ui->action_Move->setEnabled(hasChildWindows);
     ui->action_Relation_Selector->setEnabled(hasChildWindows);
-    ui->action_Remove->setEnabled(hasChildWindows);
-    ui->action_Properties->setEnabled(hasChildWindows);
     ui->actionZoom_In->setEnabled(hasChildWindows);
     ui->actionZoom_Out->setEnabled(hasChildWindows);
     ui->action_Normal->setEnabled(hasChildWindows);
     ui->action_Fit_to_Window->setEnabled(hasChildWindows);
+
+    fontCombo->setEnabled(hasChildWindows);
 }
 
 void Concerto::updateWindowMenu()
@@ -349,6 +411,234 @@ void Concerto::lineTypeSelected(int theType)
     activeSubWindow()->setLineType(theType);
     pointerGroup->actions().at(1)->setChecked(true);
     setCursor(Qt::SizeBDiagCursor);
+}
+
+void Concerto::disableContextMenuObject()
+{
+    QList<QAction *> actions = ui->menu_Object->actions();
+
+    foreach (QAction *action, actions) {
+        action->setEnabled(false);
+    }
+
+    fillColourToolButton->setEnabled(false);
+    lineColourToolButton->setEnabled(false);
+}
+
+void Concerto::enableContextMenuObject()
+{
+    QList<QAction *> actions = ui->menu_Object->actions();
+
+    foreach (QAction *action, actions) {
+        action->setEnabled(true);
+    }
+
+    fillColourToolButton->setEnabled(true);
+    lineColourToolButton->setEnabled(true);
+}
+
+void Concerto::enableFormatMenu()
+{
+    QList<QAction *> actions = ui->menu_Format->actions();
+
+    foreach (QAction *action, actions) {
+        action->setEnabled(true);
+    }
+}
+
+void Concerto::disableFormatMenu()
+{
+    QList<QAction *> actions = ui->menu_Format->actions();
+
+    foreach (QAction *action, actions) {
+        action->setEnabled(false);
+    }
+}
+
+void Concerto::currentFontChanged(QFont theFont)
+{
+    theFont.setBold(fBold);
+    theFont.setUnderline(fUnderline);
+    theFont.setItalic(fItalic);
+    activeSubWindow()->setFont(theFont);
+}
+
+void Concerto::reactToFontChange(const QFont &theFont)
+{
+    fontCombo->setFont(theFont);
+
+    fBold = theFont.bold();
+    fItalic = theFont.italic();
+    fUnderline = theFont.underline();
+
+    ui->action_Boldify->setEnabled(fBold);
+    ui->action_Underline->setEnabled(fUnderline);
+    ui->action_Italicize->setEnabled(fItalic);
+}
+
+void Concerto::boldify(bool makeBold)
+{
+    QFont theFont = fontCombo->currentFont();
+
+    if (makeBold) {
+        theFont.setBold(true);
+        fBold = true;
+    } else {
+        theFont.setBold(false);
+        fBold = false;
+    }
+
+    theFont.setUnderline(fUnderline);
+    theFont.setItalic(fItalic);
+
+    activeSubWindow()->setFont(theFont);
+}
+
+void Concerto::italicize(bool makeItalic)
+{
+    QFont theFont = fontCombo->currentFont();
+
+    if (makeItalic) {
+        theFont.setItalic(true);
+        fItalic = true;
+    } else {
+        theFont.setItalic(false);
+        fItalic = false;
+    }
+
+    theFont.setBold(fBold);
+    theFont.setUnderline(fUnderline);
+
+    activeSubWindow()->setFont(theFont);
+}
+
+void Concerto::underline(bool makeUnderline)
+{
+    QFont theFont = fontCombo->currentFont();
+
+    if (makeUnderline) {
+        theFont.setUnderline(true);
+        fUnderline = true;
+    } else {
+        theFont.setUnderline(false);
+        fUnderline = false;
+    }
+
+    theFont.setBold(fBold);
+    theFont.setItalic(fItalic);
+
+    activeSubWindow()->setFont(theFont);
+}
+
+void Concerto::saveTriggered()
+{
+    activeSubWindow()->save(tr("/home/amrith92/Desktop/test.ucd"));
+}
+
+QIcon Concerto::createColourIndicator(const QString &iconPath, const QColor theColour)
+{
+    QPixmap pixmap(50, 80);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    QPixmap image(iconPath);
+
+    // Draw icon centred horizontally on button.
+    QRect target(4, 0, 42, 43);
+    QRect source(0, 0, 42, 43);
+    painter.fillRect(QRect(0, 60, 50, 80), theColour);
+    painter.drawPixmap(target, image, source);
+
+    return QIcon(pixmap);
+}
+
+QIcon Concerto::createColourIcon(const QColor theColour)
+{
+    QPixmap pixmap(20, 20);
+    QPainter painter(&pixmap);
+    painter.setPen(Qt::NoPen);
+    painter.fillRect(QRect(0, 0, 20, 20), theColour);
+
+    return QIcon(pixmap);
+}
+
+QMenu *Concerto::createColourPickerMenu(const char *theSlot, const QColor theDefaultColour)
+{
+    QList<QColor> colours;
+    colours << Qt::white << Qt::black << Qt::red << Qt::blue << Qt::yellow;
+
+    QStringList colourNames;
+    colourNames << tr("White") << tr("Black") << tr("Red") << tr("Blue") << tr("Yellow");
+
+    QMenu *colourMenu = new QMenu(this);
+    for (size_t i = 0, term = colours.count(); i < term; ++i) {
+        QAction *action = new QAction(colourNames.at(i), this);
+        action->setData(colours.at(i));
+        action->setIcon(createColourIcon(colours.at(i)));
+
+        connect(action, SIGNAL(triggered()), this, theSlot);
+        colourMenu->addAction(action);
+
+        if (colours.at(i) == theDefaultColour) {
+            colourMenu->setDefaultAction(action);
+        }
+    }
+
+    colourMenu->addSeparator();
+
+    QAction *customColourAction = new QAction(tr("Custom Colour..."), this);
+    customColourAction->setData(tr("custom"));
+
+    connect(customColourAction, SIGNAL(triggered()), this, theSlot);
+    colourMenu->addAction(customColourAction);
+
+    return colourMenu;
+}
+
+void Concerto::fillColourChanged()
+{
+    fillAction = qobject_cast<QAction *>(sender());
+
+    if (tr("custom") == qvariant_cast<QString>(fillAction->data())) {
+        QColor theColour = QColorDialog::getColor();
+
+        if (theColour.isValid()) {
+            fillColourToolButton->setIcon(createColourIndicator(tr(":/icons/images/toolbar/format/paint.png"), theColour));
+
+            activeSubWindow()->imbueFillColour(theColour);
+        }
+    } else {
+        fillColourToolButton->setIcon(createColourIndicator(tr(":/icons/images/toolbar/format/paint.png"), qvariant_cast<QColor>(fillAction->data())));
+        fillColourButtonTriggered();
+    }
+}
+
+void Concerto::fillColourButtonTriggered()
+{
+    activeSubWindow()->imbueFillColour(qvariant_cast<QColor>(fillAction->data()));
+}
+
+void Concerto::lineColourChanged()
+{
+    lineAction = qobject_cast<QAction *>(sender());
+
+    if (tr("custom") == qvariant_cast<QString>(lineAction->data())) {
+        QColor theColour = QColorDialog::getColor();
+
+        if (theColour.isValid()) {
+            lineColourToolButton->setIcon(createColourIndicator(tr(":/icons/images/toolbar/format/linecolour.png"), theColour));
+            lineAction->setData(theColour);
+
+            activeSubWindow()->imbueLineColour(theColour);
+        }
+    } else {
+        lineColourToolButton->setIcon(createColourIndicator(":/icons/images/toolbar/format/linecolour.png", qvariant_cast<QColor>(lineAction->data())));
+        lineColourButtonTriggered();
+    }
+}
+
+void Concerto::lineColourButtonTriggered()
+{
+    activeSubWindow()->imbueLineColour(qvariant_cast<QColor>(lineAction->data()));
 }
 
 void Concerto::cleanupSubWindow()

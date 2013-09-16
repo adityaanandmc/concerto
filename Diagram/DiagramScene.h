@@ -18,24 +18,24 @@ public:
 
     explicit DiagramScene(QMenu *theItemMenu, QObject *parent = 0);
 
-    void setLineColor(const QColor &color);
-    void setTextColor(const QColor &color);
-    void setItemColor(const QColor &color);
+    void setLineColour(const QColor &colour);
+    void setTextColour(const QColor &colour);
+    void setItemColour(const QColor &colour);
     void setFont(const QFont &font);
 
     const QColor& getTextColour() const
     {
-        return theTextColor;
+        return theTextColour;
     }
 
     const QColor& getItemColour() const
     {
-        return theItemColor;
+        return theItemColour;
     }
 
     const QColor& getLineColour() const
     {
-        return theLineColor;
+        return theLineColour;
     }
     
 signals:
@@ -45,6 +45,7 @@ signals:
     void changeNodeName(const uint16_t theNodeId, const QString& theName);
     void changeLabelPosition(const uint16_t theNodeId, const QPointF& thePosition);
     void itemsMayHaveMoved();
+    void formatStateChanged(bool theState);
     
 public slots:
     void setMode(Mode mode);
@@ -53,6 +54,7 @@ public slots:
 
 private slots:
     void editorLostFocus(DiagramTextItem *item);
+    void editorHasFocus(DiagramTextItem *item);
     void nodeNameChanged(const uint16_t theNodeId, const QString& theName);
     void nodeLabelPositionChanged(DiagramTextItem *item);
 
@@ -76,9 +78,9 @@ private:
     QGraphicsLineItem *line;
     QFont theFont;
     DiagramTextItem *textItem;
-    QColor theTextColor;
-    QColor theItemColor;
-    QColor theLineColor;
+    QColor theTextColour;
+    QColor theItemColour;
+    QColor theLineColour;
 
     static int theGeneration;
 };

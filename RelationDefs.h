@@ -6,28 +6,18 @@
 #include "Relations/UnidirectionalAssociationRelation.h"
 #include "Relations/UsesRelation.h"
 
-#include "Identified.h"
 #include "Styled.h"
-#include "Positioned.h"
 
-typedef Identified<
-            Positioned<
-                Styled<
-                    UnidirectionalAssociationRelation > > > UnidirectionalAssociation;
+typedef Styled<
+            UnidirectionalAssociationRelation > UnidirectionalAssociation;
 
-typedef Identified<
-            Positioned<
-                Styled<
-                    BidirectionalAssociationRelation > > > BidirectionalAssociation;
+typedef Styled<
+            BidirectionalAssociationRelation > BidirectionalAssociation;
 
-typedef Identified<
-            Positioned<
-                Styled<
-                    ExtensionPointRelation > > > ExtensionPoint;
+typedef Styled<
+            ExtensionPointRelation > ExtensionPoint;
 
-typedef Identified<
-            Positioned<
-                Styled<
-                    UsesRelation > > > UsesAssociation;
+typedef Styled<
+            UsesRelation > UsesAssociation;
 
 #endif // RELATIONDEFS_H

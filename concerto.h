@@ -6,6 +6,8 @@
 class DiagramWindow;
 class QSignalMapper;
 class QActionGroup;
+class QFontComboBox;
+class QToolButton;
 
 namespace Ui {
 class Concerto;
@@ -40,18 +42,54 @@ private slots:
     void toolSelected(int theType);
     void lineTypeSelected(int theType);
 
+    void disableContextMenuObject();
+    void enableContextMenuObject();
+    void enableFormatMenu();
+    void disableFormatMenu();
+
+    void currentFontChanged(QFont theFont);
+    void reactToFontChange(const QFont& theFont);
+    void boldify(bool makeBold);
+    void italicize(bool makeItalic);
+    void underline(bool makeUnderline);
+
+    void fillColourChanged();
+    void fillColourButtonTriggered();
+
+    void lineColourChanged();
+    void lineColourButtonTriggered();
+
+    void saveTriggered();
+
 private:
     Ui::Concerto *ui;
 
     QSignalMapper *windowMapper;
     QActionGroup *pointerGroup;
+    QFontComboBox *fontCombo;
+
+    QToolButton *fillColourToolButton;
+    QToolButton *lineColourToolButton;
+    QAction *fillAction;
+    QAction *lineAction;
+
+    bool fBold;
+    bool fItalic;
+    bool fUnderline;
+
+    QIcon createColourIndicator(const QString& iconPath, const QColor theColour);
+    QIcon createColourIcon(const QColor theColour);
+    QMenu *createColourPickerMenu(const char *theSlot, const QColor theDefaultColour);
 
     void connectMenuActions();
+    void connectToolbars();
     void connectToolBox(DiagramWindow *subWindow);
     void connectPointers(DiagramWindow *subWindow);
     void connectViewActions(DiagramWindow *subWindow);
     void connectObjectActions(DiagramWindow *subWindow);
     void connectToolActions(DiagramWindow *subWindow);
+    void connectFormatActions(DiagramWindow *subWindow);
+    void connectFileActions(DiagramWindow *subWindow);
     DiagramWindow *activeSubWindow();
 };
 

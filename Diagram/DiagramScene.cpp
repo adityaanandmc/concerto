@@ -19,40 +19,46 @@ DiagramScene::DiagramScene(QMenu *theItemMenu, QObject *parent) :
     theLineType = UnidirectionalAssociationType;
     line = 0;
     textItem = 0;
-    theItemColor = Qt::white;
-    theTextColor = Qt::black;
-    theLineColor = Qt::black;
+    theItemColour = Qt::white;
+    theTextColour = Qt::black;
+    theLineColour = Qt::black;
 }
 
-void DiagramScene::setLineColor(const QColor &color)
+void DiagramScene::setLineColour(const QColor &colour)
 {
-    theLineColor = color;
+    theLineColour = colour;
 
     if (isItemChange(Arrow::Type)) {
         Arrow *item = qgraphicsitem_cast<Arrow *>(selectedItems().first());
-        item->setColor(theLineColor);
+        item->setColor(theLineColour);
 
         update();
+    } else if (isItemChange(DiagramItem::Type)) {
+        DiagramItem *item = qgraphicsitem_cast<DiagramItem *>(selectedItems().first());
+
+        QPen pen = item->pen();
+        pen.setBrush(colour);
+        item->setPen(pen);
     }
 }
 
-void DiagramScene::setTextColor(const QColor &color)
+void DiagramScene::setTextColour(const QColor &colour)
 {
-    theTextColor = color;
+    theTextColour = colour;
 
     if (isItemChange(DiagramTextItem::Type)) {
         DiagramTextItem *item = qgraphicsitem_cast<DiagramTextItem *>(selectedItems().first());
-        item->setDefaultTextColor(theTextColor);
+        item->setDefaultTextColor(theTextColour);
     }
 }
 
-void DiagramScene::setItemColor(const QColor &color)
+void DiagramScene::setItemColour(const QColor &colour)
 {
-    theItemColor = color;
+    theItemColour = colour;
 
     if (isItemChange(DiagramItem::Type)) {
         DiagramItem *item = qgraphicsitem_cast<DiagramItem *>(selectedItems().first());
-        item->setBrush(theItemColor);
+        item->setBrush(theItemColour);
     }
 }
 
@@ -64,7 +70,17 @@ void DiagramScene::setFont(const QFont &font)
         QGraphicsTextItem *item = qgraphicsitem_cast<DiagramTextItem *>(selectedItems().first());
 
         if (item) {
-            item->setFont(theFont);
+            QTextCursor cursor = item->textCursor();
+            QTextCharFormat fmt = cursor.charFormat(); // may be unnecessary assignment
+
+            if (cursor.hasSelection()) {
+                fmt.setFont(font);
+
+                cursor.setCharFormat(fmt);
+                item->setTextCursor(cursor);
+            } else {
+                item->setFont(font);
+            }
         }
     }
 }
@@ -95,8 +111,15 @@ void DiagramScene::editorLostFocus(DiagramTextItem *item)
         item->deleteLater();
     } else {
         DiagramItem *theParent = dynamic_cast<DiagramItem *>(item->parentItem());
-        nodeNameChanged(theParent->getId(), item->toHtml());
+        nodeNameChanged(theParent->getId(), item->toHtml().toHtmlEscaped());
     }
+
+    emit formatStateChanged(false);
+}
+
+void DiagramScene::editorHasFocus(DiagramTextItem *item)
+{
+    emit formatStateChanged(true);
 }
 
 void DiagramScene::addNode(QPointF thePlace)
@@ -104,7 +127,13 @@ void DiagramScene::addNode(QPointF thePlace)
     DiagramItem *item;
 
     item = new DiagramItem(theItemType, theItemMenu);
-    item->setBrush(theItemColor);
+
+    QPen aPen = item->pen();
+    aPen.setBrush(theLineColour);
+
+    item->setBrush(theItemColour);
+    item->setPen(aPen);
+
     addItem(item);
 
     item->setPos(thePlace);
@@ -115,13 +144,15 @@ void DiagramScene::addNode(QPointF thePlace)
 
     connect(item->getText(), SIGNAL(lostFocus(DiagramTextItem*)), this, SLOT(editorLostFocus(DiagramTextItem*)));
     connect(item->getText(), SIGNAL(selectedChange(DiagramTextItem*)), this, SLOT(nodeLabelPositionChanged(DiagramTextItem*)));
+    connect(item->getText(), SIGNAL(gainedFocus(DiagramTextItem*)), this, SLOT(editorHasFocus(DiagramTextItem*)));
 
     if (ILabelizable *mutator = dynamic_cast<ILabelizable *>(theNode)) {
         mutator->setName(tr("Node %1").arg(DiagramScene::theGeneration).toStdString());
     }
 
     if (IStylable *mutator = dynamic_cast<IStylable *>(theNode)) {
-        mutator->SetFill(theItemColor);
+        mutator->SetFill(theItemColour);
+        mutator->SetBorderFill(theLineColour);
     }
 
     if (IPositionable *mutator = dynamic_cast<IPositionable *>(theNode)) {
@@ -149,7 +180,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
     case InsertLine:
         line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(), mouseEvent->scenePos()));
-        line->setPen(QPen(theLineColor, 2));
+        line->setPen(QPen(theLineColour, 2));
         addItem(line);
         break;
 
@@ -163,7 +194,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         connect(textItem, SIGNAL(selectedChange(QGraphicsItem*)),
                 this, SIGNAL(itemSelected(QGraphicsItem*)));
         addItem(textItem);
-        textItem->setDefaultTextColor(theTextColor);
+        textItem->setDefaultTextColor(theTextColour);
         textItem->setPos(mouseEvent->scenePos());
         break;
 
@@ -211,19 +242,11 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
             DiagramItem *startItem = qgraphicsitem_cast<DiagramItem *>(startItems.first());
             DiagramItem *endItem = qgraphicsitem_cast<DiagramItem *>(endItems.first());
 
-            bool isClear = true;
-
-            {
-                INode *tester = NodeFactory::makeNode(startItem->getType());
-
-                isClear = tester->relatableWith(endItem->getType());
-
-                delete tester;
-            }
+            bool isClear = Node::relatableWith(startItem->getType(), endItem->getType());
 
             if (isClear) {
                 Arrow *arrow = new Arrow(startItem, endItem, theLineType);
-                arrow->setColor(theLineColor);
+                arrow->setColor(theLineColour);
                 startItem->addArrow(arrow);
                 endItem->addArrow(arrow);
                 arrow->setZValue(-1000.0);

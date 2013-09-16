@@ -30,6 +30,11 @@ public:
         return (mAttributeMap.end() != mAttributeMap.find(key));
     }
 
+    const std::map<std::string, std::string>& getPropertyList() const
+    {
+        return mAttributeMap;
+    }
+
 private:
     std::map<std::string, std::string> mAttributeMap;
 };

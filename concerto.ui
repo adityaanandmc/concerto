@@ -6,16 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>601</width>
-    <height>473</height>
+    <width>766</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Concerto - Mozart</string>
+   <string>Concerto</string>
   </property>
   <property name="windowIcon">
    <iconset resource="Image-Resources.qrc">
     <normaloff>:/icons/images/ucicon.png</normaloff>:/icons/images/ucicon.png</iconset>
+  </property>
+  <property name="accessibleName">
+   <string>Concerto</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QDockWidget {
@@ -52,6 +55,56 @@ QMainWindow::separator:hover {
 QMainWindow {
     background: #A1A1A1;
 }
+
+QComboBox {
+     border: 1px solid #444;
+     border-radius: 3px;
+     padding: 1px 18px 1px 3px;
+     min-width: 6em;
+ }
+
+ QComboBox:editable {
+     background: #e6e6e6;
+ }
+
+ QComboBox:!editable, QComboBox::drop-down:editable {
+      background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                  stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
+                                  stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
+ }
+
+ /* QComboBox gets the &quot;on&quot; state when the popup is open */
+ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #D3D3D3, stop: 0.4 #D8D8D8,
+                                 stop: 0.5 #DDDDDD, stop: 1.0 #E1E1E1);
+ }
+
+ QComboBox:on { /* shift the text when the popup opens */
+     padding-top: 3px;
+     padding-left: 4px;
+ }
+
+ QComboBox::drop-down {
+     subcontrol-origin: padding;
+     subcontrol-position: top right;
+     width: 15px;
+
+     border-left-width: 1px;
+     border-left-color: darkgray;
+     border-left-style: solid; /* just a single line */
+     border-top-right-radius: 3px; /* same radius as the QComboBox */
+     border-bottom-right-radius: 3px;
+ }
+
+ QComboBox::down-arrow {
+	image: url(:/icons/images/toolbar/format/arrow_down.png);
+ }
+
+ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
+     top: 1px;
+     left: 1px;
+ }
 </string>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
@@ -153,7 +206,7 @@ QTabWidget::pane { /* The tab widget frame */
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>601</width>
+     <width>766</width>
      <height>25</height>
     </rect>
    </property>
@@ -281,8 +334,6 @@ QTabWidget::pane { /* The tab widget frame */
     <addaction name="action_Italicize"/>
     <addaction name="action_Underline"/>
     <addaction name="separator"/>
-    <addaction name="action_Colourize"/>
-    <addaction name="separator"/>
     <addaction name="actionFont"/>
    </widget>
    <addaction name="menu_File"/>
@@ -376,6 +427,9 @@ QToolBox::tab:selected {
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QToolBox" name="toolBox">
+       <property name="cursor">
+        <cursorShape>CrossCursor</cursorShape>
+       </property>
        <property name="toolTip">
         <string>Tool Box</string>
        </property>
@@ -397,7 +451,7 @@ QToolBox::tab:selected {
           <x>0</x>
           <y>0</y>
           <width>211</width>
-          <height>220</height>
+          <height>231</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -615,8 +669,8 @@ QToolButton:pressed {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>130</width>
-          <height>130</height>
+          <width>211</width>
+          <height>227</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -796,8 +850,8 @@ QToolButton:pressed {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>130</width>
-          <height>130</height>
+          <width>211</width>
+          <height>227</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -1047,15 +1101,49 @@ QToolButton:hover {
    <property name="styleSheet">
     <string notr="true">QToolButton { /* all types of tool button */
 	background-color: transparent;
-	border-radius: 4px;
-	padding: 4px;
+	border-radius: 3px;
+	padding: 2px;
+ }
+
+QToolButton[popupMode=&quot;1&quot;] { /* only for MenuButtonPopup */
+	padding-right: 20px; /* make way for the popup button */
  }
 
 QToolButton:hover {
 	background-color: qlineargradient(spread:pad, x1:0.486, y1:1, x2:0.538, y2:0, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(255, 255, 255, 0));
 	border-color: transparent;
 }
+
+QToolButton:pressed, QToolButton:checked {
+	background-color: qlineargradient(spread:pad, x1:0.486, y1:1, x2:0.49, y2:0, stop:0 rgba(14, 14, 14, 255), stop:0.295238 rgba(19, 19, 19, 214), stop:0.533333 rgba(41, 41, 41, 194), stop:1 rgba(14, 14, 14, 255));
+	border: solid 1px #222;
+}
+
+ QToolButton::menu-button {
+     border: 1px solid #222;
+     border-top-right-radius: 3px;
+     border-bottom-right-radius: 3px;
+     /* 16px width + 4px for border = 20px allocated above */
+     width: 16px;
+	background-color: qlineargradient(spread:pad, x1:0.501, y1:0, x2:0.49, y2:1, stop:0 rgba(49, 49, 49, 111), stop:0.519048 rgba(62, 62, 62, 177), stop:0.547619 rgba(64, 64, 64, 187), stop:1 rgba(31, 31, 31, 235));
+ }
+
+QToolButton::menu-button:hover {
+	
+	background-color: qlineargradient(spread:pad, x1:0.523, y1:0, x2:0.505, y2:1, stop:0 rgba(0, 0, 0, 0), stop:0.752381 rgba(47, 15, 28, 206), stop:1 rgba(61, 19, 36, 217));
+}
+
+ QToolButton::menu-arrow {
+     image: url(:/icons/images/toolbar/format/arrow_down_white.png);
+ }
+
+ QToolButton::menu-arrow:open {
+     top: 1px; left: 1px; /* shift it a bit */
+ }
 </string>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomToolBarArea|Qt::TopToolBarArea</set>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -1067,7 +1155,6 @@ QToolButton:hover {
    <addaction name="action_Italicize"/>
    <addaction name="action_Underline"/>
    <addaction name="separator"/>
-   <addaction name="action_Colourize"/>
   </widget>
   <action name="action_New">
    <property name="icon">
@@ -1644,12 +1731,15 @@ QToolButton:hover {
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="Image-Resources.qrc">
-     <normaloff>:/icons/images/menu/Format/format-text-bold.png</normaloff>:/icons/images/menu/Format/format-text-bold.png</iconset>
+     <normaloff>:/icons/images/toolbar/format/bold.png</normaloff>:/icons/images/toolbar/format/bold.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Boldify</string>
@@ -1664,22 +1754,10 @@ QToolButton:hover {
    </property>
    <property name="icon">
     <iconset resource="Image-Resources.qrc">
-     <normaloff>:/icons/images/menu/Format/format-text-italic.png</normaloff>:/icons/images/menu/Format/format-text-italic.png</iconset>
+     <normaloff>:/icons/images/toolbar/format/italic.png</normaloff>:/icons/images/toolbar/format/italic.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Italicize</string>
-   </property>
-  </action>
-  <action name="action_Colourize">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="Image-Resources.qrc">
-     <normaloff>:/icons/images/menu/Format/edit-clear.svg</normaloff>:/icons/images/menu/Format/edit-clear.svg</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Colourize</string>
    </property>
   </action>
   <action name="action_Underline">
@@ -1691,7 +1769,7 @@ QToolButton:hover {
    </property>
    <property name="icon">
     <iconset resource="Image-Resources.qrc">
-     <normaloff>:/icons/images/menu/Format/format-text-underline.png</normaloff>:/icons/images/menu/Format/format-text-underline.png</iconset>
+     <normaloff>:/icons/images/toolbar/format/underline.png</normaloff>:/icons/images/toolbar/format/underline.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Underline</string>

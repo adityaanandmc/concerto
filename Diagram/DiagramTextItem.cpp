@@ -24,6 +24,17 @@ void DiagramTextItem::focusOutEvent(QFocusEvent *event)
     QGraphicsTextItem::focusOutEvent(event);
 }
 
+void DiagramTextItem::focusInEvent(QFocusEvent *event)
+{
+    if (textInteractionFlags() == Qt::NoTextInteraction) {
+        setTextInteractionFlags(Qt::TextEditorInteraction);
+    }
+
+    emit gainedFocus(this);
+
+    QGraphicsTextItem::focusOutEvent(event);
+}
+
 void DiagramTextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     if (textInteractionFlags() == Qt::NoTextInteraction) {

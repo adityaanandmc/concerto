@@ -152,6 +152,12 @@ void DiagramItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     scene()->clearSelection();
     setSelected(true);
+    QList<QAction *> actions = theMenu->actions();
+
+    foreach (QAction *action, actions) {
+        action->setEnabled(true);
+    }
+
     theMenu->exec(event->screenPos());
 }
 

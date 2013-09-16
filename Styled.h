@@ -12,16 +12,10 @@ public:
 
     void SetFill(const QColor& theColour)
     {
-        int r, g, b;
-
-        theColour.getRgb(&r, &g, &b);
-
-        theFill.r = r;
-        theFill.g = g;
-        theFill.b = b;
+        theColour.getRgb(&theFill.r, &theFill.g, &theFill.b);
     }
 
-    void SetFill(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
+    void SetFill(const int r, const int g, const int b, const int a)
     {
         theFill.r = r;
         theFill.g = g;
@@ -31,16 +25,10 @@ public:
 
     void SetBorderFill(const QColor& theColour)
     {
-        int r, g, b;
-
-        theColour.getRgb(&r, &g, &b);
-
-        theBorderFill.r = r;
-        theBorderFill.g = g;
-        theBorderFill.b = b;
+        theColour.getRgb(&theBorderFill.r, &theBorderFill.g, &theBorderFill.b);
     }
 
-    void SetBorderFill(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
+    void SetBorderFill(const int r, const int g, const int b, const int a)
     {
         theBorderFill.r = r;
         theBorderFill.g = g;
@@ -58,20 +46,9 @@ public:
         return theBorderFill;
     }
 
-    const Font& GetFont() const
-    {
-        return theFont;
-    }
-
-    void SetFont(const Font& theFont)
-    {
-        this->theFont = theFont;
-    }
-
 private:
     Colour theFill;
     Colour theBorderFill;
-    Font theFont;
 };
 
 #endif // COLOURED_H

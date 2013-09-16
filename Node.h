@@ -30,9 +30,9 @@ public:
         return false; // pretty much useless, but suppresses annoying warnings #gcc
     }
 
-    bool relatableWith(const NodeType theOther) const
+    static bool relatableWith(const NodeType thisType, const NodeType theOther)
     {
-        switch (theType) {
+        switch (thisType) {
         case UsecaseType:
             switch (theOther) {
             case UsecaseType:
