@@ -241,6 +241,7 @@ void Concerto::connectObjectActions(DiagramWindow *subWindow)
     connect(ui->action_Remove, SIGNAL(triggered()), subWindow, SLOT(deleteSelectedItem()));
     connect(ui->actionSend_Forward, SIGNAL(triggered()), subWindow, SLOT(bringForward()));
     connect(ui->actionSend_Backward, SIGNAL(triggered()), subWindow, SLOT(sendBackward()));
+    connect(ui->action_Properties, SIGNAL(triggered()), subWindow, SLOT(propertiesRequested()));
 
     connect(subWindow, SIGNAL(contextMenuDisable()), this, SLOT(disableContextMenuObject()));
     connect(subWindow, SIGNAL(contextMenuEnable()), this, SLOT(enableContextMenuObject()));
@@ -397,13 +398,60 @@ void Concerto::nodeInsertFinished()
 {
     pointerGroup->actions().at(2)->setChecked(true);
     setCursor(Qt::SizeAllCursor);
+    ui->toolBoxDock->setCursor(Qt::ArrowCursor);
 }
 
 void Concerto::toolSelected(int theType)
 {
     activeSubWindow()->setItemType(theType);
     pointerGroup->actions().at(0)->setChecked(true);
-    setCursor(Qt::PointingHandCursor);
+
+    switch (static_cast<NodeType>(theType)) {
+    case ActorType:
+        setCursor(QCursor(tr(":/icons/images/items/user-add.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/user-add.png")));
+        break;
+
+    case UsecaseType:
+        setCursor(QCursor(tr(":/icons/images/items/usecase-add.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/usecase-add.png")));
+        break;
+
+    case SubFlowType:
+        setCursor(QCursor(tr(":/icons/images/items/subflow.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/subflow.png")));
+        break;
+
+    case AltFlowType:
+        setCursor(QCursor(tr(":/icons/images/items/altflow.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/altflow.png")));
+        break;
+
+    case SecFlowType:
+        setCursor(QCursor(tr(":/icons/images/items/secflow.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/security.png")));
+        break;
+
+    case GeomSquareType:
+        setCursor(QCursor(tr(":/icons/images/items/square.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/square.png")));
+        break;
+
+    case GeomRectangleType:
+        setCursor(QCursor(tr(":/icons/images/items/rectangle.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/rectangle.png")));
+        break;
+
+    case GeomTriangleType:
+        setCursor(QCursor(tr(":/icons/images/items/triangle.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/triangle.png")));
+        break;
+
+    case GeomCircleType:
+        setCursor(QCursor(tr(":/icons/images/items/circle.png")));
+        ui->toolBoxDock->setCursor(QCursor(tr(":/icons/images/items/circle.png")));
+        break;
+    }
 }
 
 void Concerto::lineTypeSelected(int theType)
@@ -411,6 +459,7 @@ void Concerto::lineTypeSelected(int theType)
     activeSubWindow()->setLineType(theType);
     pointerGroup->actions().at(1)->setChecked(true);
     setCursor(Qt::SizeBDiagCursor);
+    ui->toolBoxDock->setCursor(Qt::SizeBDiagCursor);
 }
 
 void Concerto::disableContextMenuObject()

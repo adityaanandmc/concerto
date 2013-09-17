@@ -48,6 +48,7 @@ public slots:
     void sendBackward();
     void imbueFillColour(const QColor& theColour);
     void imbueLineColour(const QColor& theColour);
+    void propertiesRequested();
     
 private slots:
     void documentWasModified();

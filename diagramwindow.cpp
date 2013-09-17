@@ -5,6 +5,7 @@
 #include "ILabelizable.h"
 #include "IPositionable.h"
 #include "IStylable.h"
+#include "NodePropertiesDialog.h"
 
 int DiagramWindow::theGeneration = 1;
 
@@ -240,6 +241,34 @@ void DiagramWindow::imbueLineColour(const QColor &theColour)
 
             if (IStylable *theStyler = dynamic_cast<IStylable *>(theNode)) {
                 theStyler->SetBorderFill(theColour);
+            }
+        }
+    }
+}
+
+void DiagramWindow::propertiesRequested()
+{
+    QList<QGraphicsItem *> items = theScene->selectedItems();
+
+    if (0 == items.count()) {
+        return;
+    }
+
+    DiagramItem *item = dynamic_cast<DiagramItem *>(items.first());
+
+    if (item) {
+        INode *theNode = theModel->grabNode(item->getId());
+
+        if (IAttributable *nodeAttributes = dynamic_cast<IAttributable *>(theNode)) {
+            NodePropertiesDialog *theDialog = new NodePropertiesDialog(nodeAttributes, this);
+
+            if (theDialog->exec() == QDialog::Accepted) {
+                std::map<std::string, std::string> theAttributes = theDialog->getSavedAttributes();
+                std::map<std::string, std::string>::const_iterator it, end = theAttributes.end();
+
+                for (it = theAttributes.begin(); it != end; ++it) {
+                    nodeAttributes->setAttribute(it->first, it->second);
+                }
             }
         }
     }

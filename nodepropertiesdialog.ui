@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NodePropertiesDialog</class>
+ <widget class="QDialog" name="NodePropertiesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>456</width>
+    <height>298</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Node Properties</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="Image-Resources.qrc">
+    <normaloff>:/icons/images/menu/Object/prop.png</normaloff>:/icons/images/menu/Object/prop.png</iconset>
+  </property>
+  <property name="toolTip">
+   <string>Modify </string>
+  </property>
+  <property name="statusTip">
+   <string>node properties</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QComboBox {
+     border: 1px solid #444;
+     border-radius: 3px;
+     padding: 1px 18px 1px 3px;
+     min-width: 6em;
+ }
+
+ QComboBox:editable {
+     background: #e6e6e6;
+ }
+
+ QComboBox:!editable, QComboBox::drop-down:editable {
+      background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                  stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
+                                  stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
+ }
+
+ /* QComboBox gets the &quot;on&quot; state when the popup is open */
+ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #D3D3D3, stop: 0.4 #D8D8D8,
+                                 stop: 0.5 #DDDDDD, stop: 1.0 #E1E1E1);
+ }
+
+ QComboBox:on { /* shift the text when the popup opens */
+     padding-top: 3px;
+     padding-left: 4px;
+ }
+
+ QComboBox::drop-down {
+     subcontrol-origin: padding;
+     subcontrol-position: top right;
+     width: 15px;
+
+     border-left-width: 1px;
+     border-left-color: darkgray;
+     border-left-style: solid; /* just a single line */
+     border-top-right-radius: 3px; /* same radius as the QComboBox */
+     border-bottom-right-radius: 3px;
+ }
+
+ QComboBox::down-arrow {
+	image: url(:/icons/images/toolbar/format/arrow_down.png);
+ }
+
+ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
+     top: 1px;
+     left: 1px;
+ }
+
+QComboBox QAbstractItemView {
+     border: none;
+     selection-background-color: lightgray;
+	color: rgb(39, 39, 39);
+ }</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="generalTab">
+      <attribute name="title">
+       <string>General</string>
+      </attribute>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Design Scope</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="designScopeComboBox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>401</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>Organization (black-box)</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/organization-filled.png</normaloff>:/icons/images/context/item-properties/organization-filled.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Organization (white-box)</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/organization-empty.png</normaloff>:/icons/images/context/item-properties/organization-empty.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>System (black-box)</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/system-filled.png</normaloff>:/icons/images/context/item-properties/system-filled.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>System (white-box)</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/system-empty.png</normaloff>:/icons/images/context/item-properties/system-empty.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Component</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/component.png</normaloff>:/icons/images/context/item-properties/component.png</iconset>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Goal Level</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="goalLevelComboBox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>130</y>
+         <width>401</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>Very High Summary</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/cloud.png</normaloff>:/icons/images/context/item-properties/cloud.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>High Summary</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/kite.png</normaloff>:/icons/images/context/item-properties/kite.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>User Goal</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/waves.png</normaloff>:/icons/images/context/item-properties/waves.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Subfunction</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/fish.png</normaloff>:/icons/images/context/item-properties/fish.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Too Low</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Image-Resources.qrc">
+          <normaloff>:/icons/images/context/item-properties/clam.png</normaloff>:/icons/images/context/item-properties/clam.png</iconset>
+        </property>
+       </item>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="preConditionsTab">
+      <attribute name="title">
+       <string>Pre Conditions</string>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Pre conditions</string>
+      </attribute>
+      <attribute name="whatsThis">
+       <string>Add preconditions for this node</string>
+      </attribute>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>111</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Pre Conditions</string>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="preConditionsTextBox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>411</width>
+         <height>141</height>
+        </rect>
+       </property>
+       <property name="autoFormatting">
+        <set>QTextEdit::AutoAll</set>
+       </property>
+       <property name="documentTitle">
+        <string>Pre Conditions</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="postConditionsTab">
+      <attribute name="title">
+       <string>Post Conditions</string>
+      </attribute>
+      <widget class="QTabWidget" name="tabWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>411</width>
+         <height>191</height>
+        </rect>
+       </property>
+       <property name="tabPosition">
+        <enum>QTabWidget::South</enum>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>Minimal Gurantees</string>
+        </attribute>
+        <widget class="QTextEdit" name="minimalGuaranteesTextBox">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>411</width>
+           <height>161</height>
+          </rect>
+         </property>
+         <property name="autoFormatting">
+          <set>QTextEdit::AutoAll</set>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>Success Guarantees</string>
+        </attribute>
+        <widget class="QTextEdit" name="successGuaranteesTextBox">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>411</width>
+           <height>161</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
+         <string>Trigger</string>
+        </attribute>
+        <widget class="QTextEdit" name="triggerTextBox">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>411</width>
+           <height>161</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_4">
+        <attribute name="title">
+         <string>Main Success Scenario</string>
+        </attribute>
+        <widget class="QTextEdit" name="mainSuccessScenarioTextBox">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>411</width>
+           <height>161</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="miscellaneousTab">
+      <attribute name="title">
+       <string>Miscellaneous</string>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Add notes</string>
+      </attribute>
+      <attribute name="whatsThis">
+       <string>Attach a note to this node</string>
+      </attribute>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>67</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Notes</string>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="notesTextBox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>411</width>
+         <height>151</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="Image-Resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>NodePropertiesDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>NodePropertiesDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

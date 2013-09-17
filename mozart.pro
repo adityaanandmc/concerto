@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     Diagram/Arrow.cpp \
     Diagram/DiagramScene.cpp \
     TinyXML/tinyxml2.cpp \
-    ModelMapper.cpp
+    ModelMapper.cpp \
+    NodePropertiesDialog.cpp
 
 HEADERS  += concerto.h \
     diagramwindow.h \
@@ -75,9 +76,11 @@ HEADERS  += concerto.h \
     TinyXML/tinyxml2.h \
     IModelMapper.h \
     ModelMapper.h \
-    StdStringUtil.h
+    StdStringUtil.h \
+    NodePropertiesDialog.h
 
-FORMS    += concerto.ui
+FORMS    += concerto.ui \
+    nodepropertiesdialog.ui
 
 RESOURCES += \
     Image-Resources.qrc

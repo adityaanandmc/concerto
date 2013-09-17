@@ -25,32 +25,31 @@ typedef Identified<
                             UsecaseGraphNode > > > > > UsecaseNode;
 
 typedef Identified<
-            Attributed<
-                Labelled<
-                    Positioned<
-                        Styled<
-                            UsecaseGraphNode > > > > > ActorNode;
+            Labelled<
+                Positioned<
+                    Styled<
+                        ActorGraphNode > > > > ActorNode;
 
 typedef Identified<
             Attributed<
                 Labelled<
                     Positioned<
                         Styled<
-                            UsecaseGraphNode > > > > > SubFlowNode;
+                            SubFlowGraphNode > > > > > SubFlowNode;
 
 typedef Identified<
             Attributed<
                 Labelled<
                     Positioned<
                         Styled<
-                            UsecaseGraphNode > > > > > AltFlowNode;
+                            AltFlowGraphNode > > > > > AltFlowNode;
 
 typedef Identified<
             Attributed<
                 Labelled<
                     Positioned<
                         Styled<
-                            UsecaseGraphNode > > > > > SecFlowNode;
+                            SecFlowGraphNode > > > > > SecFlowNode;
 
 typedef Identified<
             Labelled<
@@ -62,18 +61,18 @@ typedef Identified<
             Labelled<
                 Positioned<
                     Styled<
-                        SquareGraphNode > > > > RectangleNode;
+                        RectangleGraphNode > > > > RectangleNode;
 
 typedef Identified<
             Labelled<
                 Positioned<
                     Styled<
-                        SquareGraphNode > > > > CircleNode;
+                        CircleGraphNode > > > > CircleNode;
 
 typedef Identified<
             Labelled<
                 Positioned<
                     Styled<
-                        SquareGraphNode > > > > TriangleNode;
+                        TriangleGraphNode > > > > TriangleNode;
 
 #endif // NODEDEFS_H

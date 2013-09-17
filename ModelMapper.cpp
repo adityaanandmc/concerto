@@ -280,5 +280,9 @@ void ModelMapper::save(const std::string &theFile, const IDocumentModel *theMode
         }
     }
 
-    doc.SaveFile(theFile.c_str());
+    if (XML_SUCCESS == doc.SaveFile(theFile.c_str())) {
+        theStatus = true;
+    } else {
+        theStatus = false;
+    }
 }
