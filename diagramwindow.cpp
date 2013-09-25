@@ -6,6 +6,11 @@
 #include "IPositionable.h"
 #include "IStylable.h"
 #include "NodePropertiesDialog.h"
+#include "Undoable/InsertNode.h"
+#include "Undoable/InsertRelation.h"
+#include "Undoable/RemoveNode.h"
+#include "Undoable/RemoveRelation.h"
+#include "Undoable/MoveNode.h"
 
 int DiagramWindow::theGeneration = 1;
 
@@ -16,6 +21,8 @@ DiagramWindow::DiagramWindow(QMenu *theObjectMenu)
     // Maybe later :P [auto-pan]
     setDragMode(RubberBandDrag);
 
+    theUndoStack = new QUndoStack(this);
+
     theScene = new DiagramScene(theObjectMenu, this);
     theScene->setSceneRect(QRectF(0, 0, 5000, 5000));
 
@@ -25,7 +32,7 @@ DiagramWindow::DiagramWindow(QMenu *theObjectMenu)
     theModel.reset(new DocumentModel(tr("Untitled %1").arg(DiagramWindow::theGeneration).toStdString(), std::string("A use-case diagram")));
 
     connect(theScene, SIGNAL(itemInserted(const INode*)), this, SLOT(nodeAdded(const INode*)));
-    connect(theScene, SIGNAL(relationEstablished(uint16_t,uint16_t,const IRelation*)), this, SLOT(relationEstablished(uint16_t,uint16_t,const IRelation*)));
+    connect(theScene, SIGNAL(relationEstablished(uint16_t,uint16_t,const IRelation*, bool)), this, SLOT(relationEstablished(uint16_t,uint16_t,const IRelation*,bool)));
     connect(theScene, SIGNAL(changeNodeName(uint16_t,QString)), this, SLOT(nodeNameChanged(uint16_t,QString)));
     connect(theScene, SIGNAL(changeLabelPosition(uint16_t,QPointF)), this, SLOT(labelPositionChanged(uint16_t,QPointF)));
     connect(theScene, SIGNAL(itemsMayHaveMoved()), this, SLOT(nodePositionsMayHaveChanged()));
@@ -103,19 +110,15 @@ void DiagramWindow::resetZoom()
 
 void DiagramWindow::deleteSelectedItem()
 {
+    theUndoStack->beginMacro(tr("Delete Selected Items"));
+
     foreach (QGraphicsItem *item, theScene->selectedItems()) {
          if (Arrow *arrow = dynamic_cast<Arrow *>(item)) {
             const INode *thisNode = theModel->getNode(arrow->startItem()->getId()),
                         *thatNode = theModel->getNode(arrow->endItem()->getId());
 
             if (thisNode && thatNode) {
-                const IRelation *theRelation = theModel->getRelation(thisNode, thatNode);
-
-                if (theRelation) {
-                    theModel->breakUp(theRelation);
-                    theScene->removeItem(item);
-                    delete item;
-                }
+                theUndoStack->push(new RemoveRelation(this, thisNode, thatNode));
             }
         }
     }
@@ -124,12 +127,11 @@ void DiagramWindow::deleteSelectedItem()
         if (DiagramItem *it = dynamic_cast<DiagramItem *>(item)) {
             const INode *theNode = theModel->getNode(it->getId());
 
-            theModel->removeNode(theNode);
-            it->removeArrows();
-            theScene->removeItem(item);
-            delete item;
+            theUndoStack->push(new RemoveNode(this, theNode));
         }
     }
+
+    theUndoStack->endMacro();
 }
 
 void DiagramWindow::bringForward()
@@ -242,6 +244,15 @@ void DiagramWindow::imbueLineColour(const QColor &theColour)
             if (IStylable *theStyler = dynamic_cast<IStylable *>(theNode)) {
                 theStyler->SetBorderFill(theColour);
             }
+        } else if (Arrow *arrow = dynamic_cast<Arrow *>(anItem)) {
+            const INode *thisNode = theModel->getNode(arrow->startItem()->getId()),
+                        *thatNode = theModel->getNode(arrow->endItem()->getId());
+
+            IRelation *theRelation = theModel->grabRelation(thisNode, thatNode);
+
+            if (IStylable *theStyler = dynamic_cast<IStylable *>(theRelation)) {
+                theStyler->SetBorderFill(theColour);
+            }
         }
     }
 }
@@ -276,17 +287,28 @@ void DiagramWindow::propertiesRequested()
 
 void DiagramWindow::nodeAdded(const INode *theNode)
 {
-    theModel->addNode(theNode);
+    theUndoStack->push(new InsertNode(this, theNode));
 
     emit nodeInserted();
 }
 
-void DiagramWindow::relationEstablished(const uint16_t thisNodeId, const uint16_t thatNodeId, const IRelation *theRelation)
+void DiagramWindow::nodeRemoved(const uint16_t theId)
+{
+    const INode *theNode = theModel->getNode(theId);
+
+    theUndoStack->push(new RemoveNode(this, theNode));
+}
+
+void DiagramWindow::relationEstablished(const uint16_t thisNodeId, const uint16_t thatNodeId, const IRelation *theRelation, bool record)
 {
     const INode *thisNode = theModel->getNode(thisNodeId),
                 *thatNode = theModel->getNode(thatNodeId);
 
-    theModel->relate(theRelation, thisNode, thatNode);
+    if (false == record) {
+        theModel->relate(theRelation, thisNode, thatNode);
+    } else {
+        theUndoStack->push(new InsertRelation(this, theRelation, thisNode, thatNode));
+    }
 }
 
 void DiagramWindow::nodeNameChanged(const uint16_t theNodeId, const QString &theText)
@@ -313,23 +335,44 @@ void DiagramWindow::nodePositionsMayHaveChanged()
 {
     QList<QGraphicsItem *> items = theScene->selectedItems();
 
+    if (items.count() > 1) {
+        theUndoStack->beginMacro(tr("Moved selected items"));
+    }
+
     foreach (QGraphicsItem *anItem, items) {
         if (DiagramItem *thisItem = dynamic_cast<DiagramItem *>(anItem)) {
             INode *theNode = theModel->grabNode(thisItem->getId());
-
-            if (IPositionable *thePositioner = dynamic_cast<IPositionable *>(theNode)) {
-                thePositioner->setPosition(thisItem->x(), thisItem->y(), thisItem->zValue());
-            }
+            theUndoStack->push(new MoveNode(this, theNode, QPointF(thisItem->x(), thisItem->y())));
         }
+    }
+
+    if (items.count() > 1) {
+        theUndoStack->endMacro();
     }
 }
 
-void DiagramWindow::save(const QString& path)
+bool DiagramWindow::save(const QString& path)
 {
     ModelMapper theMapper;
     bool fFlag = true;
 
     theMapper.save(path.toStdString(), theModel.get(), fFlag);
+
+    return fFlag;
+}
+
+bool DiagramWindow::load(const QString &path)
+{
+    ModelMapper theMapper;
+    bool fFlag = true;
+
+    theMapper.load(path.toStdString(), theModel.get(), fFlag);
+
+    if (fFlag) {
+        reflectModel();
+    }
+
+    return fFlag;
 }
 
 void DiagramWindow::handleSelectionChanged()
@@ -359,6 +402,43 @@ void DiagramWindow::handleFormatStateChange(bool theState)
                     emit formatFontSettingsChange(cursor.charFormat().font());
                 }
             }
+        }
+    }
+}
+
+void DiagramWindow::reflectModel()
+{
+    GraphType theGraph = theModel->getGraph();
+
+    {
+        vertex_iterator_t vi, vi_end, next;
+
+        boost::tie(vi, vi_end) = boost::vertices(theGraph);
+        for (next = vi; vi != vi_end; vi = next) {
+            ++next;
+
+            INode *theNode = theGraph[*vi].theNode;
+            theScene->insertNode(theNode, std::map<IRelation *, INode *>());
+        }
+    }
+
+    {
+        edge_iterator_t ei, ei_end, next;
+        vertex_t source, target;
+
+        boost::tie(ei, ei_end) = boost::edges(theGraph);
+        for (next = ei; ei != ei_end; ei = next) {
+            ++next;
+
+            IRelation *theRelation = theGraph[*ei].theRelation;
+
+            source = boost::source(*ei, theGraph);
+            target = boost::target(*ei, theGraph);
+
+            INode *thisNode = theGraph[source].theNode,
+                  *thatNode = theGraph[target].theNode;
+
+            theScene->createRelation(theRelation, thisNode, thatNode);
         }
     }
 }

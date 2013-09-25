@@ -1,9 +1,7 @@
 #include "ModelMapper.h"
-#include "IIdentifiable.h"
-#include "IPositionable.h"
-#include "IStylable.h"
-#include "ILabelizable.h"
-#include "IAttributable.h"
+#include "Author.h"
+#include "NodeFactory.h"
+#include "RelationFactory.h"
 #include "TinyXML/tinyxml2.h"
 #include "StdStringUtil.h"
 
@@ -20,6 +18,331 @@ void ModelMapper::load(const std::string &theFile, IDocumentModel *theModel, boo
         theStatus = false;
         return;
     }
+
+    XMLDocument doc;
+
+    if (XML_SUCCESS != doc.LoadFile(theFile.c_str())) {
+        theStatus = false;
+        return;
+    }
+
+    XMLElement *root = doc.FirstChildElement("Document");
+
+    if (!root) {
+        theStatus = false;
+        return;
+    }
+
+    // Meta Block
+    {
+        XMLElement *meta = root->FirstChildElement("meta");
+
+        if (meta) {
+            if (XMLElement *element = meta->FirstChildElement("model")) {
+                theModel->setTitle(element->GetText());
+            }
+
+            if (XMLElement *element = meta->FirstChildElement("description")) {
+                theModel->setDescription(element->GetText());
+            }
+
+            if (XMLElement *element = meta->FirstChildElement("author")) {
+                Author *author = new Author;
+                if (NULL != element->GetText()) {
+                    author->setName(element->GetText());
+                }
+
+                theModel->setAuthor(author);
+            }
+        }
+    }
+
+    // Objects Block
+    {
+        XMLElement *objects = root->FirstChildElement("objects");
+
+        if (!objects) {
+            theStatus = false;
+            return;
+        }
+
+        XMLElement *node = objects->FirstChildElement("node");
+
+        int _temp;
+
+        while (node) {
+            INode *theNode = NULL;
+
+            if (XML_SUCCESS == node->QueryIntAttribute("type", &_temp)) {
+                NodeType theType = static_cast<NodeType>(_temp);
+
+                theNode = NodeFactory::makeNode(theType);
+
+                if (NULL == theNode) {
+                    theStatus = false;
+                    return;
+                }
+            } else {
+                // FATAL. Nodes *need* to be of a type!
+                theStatus = false;
+                return;
+            }
+
+            // Implements IIdentifiable
+            if (XML_SUCCESS == node->QueryIntAttribute("id", &_temp)) {
+                if (IIdentifiable *thing = dynamic_cast<IIdentifiable *>(theNode)) {
+                    thing->setId(static_cast<uint16_t>(_temp));
+                }
+            }
+
+            // Implements ILabelizable
+            if (XMLElement *label = node->FirstChildElement("label")) {
+                if (ILabelizable *thing = dynamic_cast<ILabelizable *>(theNode)) {
+                    if (XMLElement *name = label->FirstChildElement("name")) {
+                        thing->setName(name->GetText());
+                    }
+
+                    if (XMLElement *position = label->FirstChildElement("position")) {
+                        double xPos = 0, yPos = 0;
+
+                        if (XMLElement *x = position->FirstChildElement("x")) {
+                            xPos = Util::StdString::fromString<double>(x->GetText());
+                        }
+
+                        if (XMLElement *y = position->FirstChildElement("y")) {
+                            yPos = Util::StdString::fromString<double>(y->GetText());
+                        }
+
+                        thing->setLabelPosition(xPos, yPos);
+                    }
+                } else {
+                    theStatus = false;
+                    return;
+                }
+            }
+
+            // Implements IPositionable
+            if (XMLElement *position = node->FirstChildElement("position")) {
+                if (IPositionable *thing = dynamic_cast<IPositionable *>(theNode)) {
+                    double xPos, yPos, zVal;
+                    xPos = yPos = zVal = 0;
+
+                    if (XMLElement *x = position->FirstChildElement("x")) {
+                        xPos = Util::StdString::fromString<double>(x->GetText());
+                    }
+
+                    if (XMLElement *y = position->FirstChildElement("y")) {
+                        yPos = Util::StdString::fromString<double>(y->GetText());
+                    }
+
+                    if (XMLElement *z = position->FirstChildElement("z")) {
+                        zVal = Util::StdString::fromString<double>(z->GetText());
+                    }
+
+                    thing->setPosition(xPos, yPos, zVal);
+                } else {
+                    theStatus = false;
+                    return;
+                }
+            }
+
+            // Implements IStylable
+            if (XMLElement *style = node->FirstChildElement("style")) {
+                if (IStylable *thing = dynamic_cast<IStylable *>(theNode)) {
+                    if (XMLElement *fill = style->FirstChildElement("fill")) {
+                        if (XMLElement *colour = fill->FirstChildElement("colour")) {
+                            Colour col;
+
+                            if (XMLElement *r = colour->FirstChildElement("r")) {
+                                col.r = Util::StdString::fromString<int>(r->GetText());
+                            }
+
+                            if (XMLElement *g = colour->FirstChildElement("g")) {
+                                col.g = Util::StdString::fromString<int>(g->GetText());
+                            }
+
+                            if (XMLElement *b = colour->FirstChildElement("b")) {
+                                col.b = Util::StdString::fromString<int>(b->GetText());
+                            }
+
+                            if (XMLElement *a = colour->FirstChildElement("a")) {
+                                col.a = Util::StdString::fromString<int>(a->GetText());
+                            }
+
+                            thing->SetFill(col.r, col.g, col.b, col.a);
+                        }
+                    }
+
+                    if (XMLElement *line = style->FirstChildElement("line")) {
+                        if (XMLElement *colour = line->FirstChildElement("colour")) {
+                            Colour col;
+
+                            if (XMLElement *r = colour->FirstChildElement("r")) {
+                                col.r = Util::StdString::fromString<int>(r->GetText());
+                            }
+
+                            if (XMLElement *g = colour->FirstChildElement("g")) {
+                                col.g = Util::StdString::fromString<int>(g->GetText());
+                            }
+
+                            if (XMLElement *b = colour->FirstChildElement("b")) {
+                                col.b = Util::StdString::fromString<int>(b->GetText());
+                            }
+
+                            if (XMLElement *a = colour->FirstChildElement("a")) {
+                                col.a = Util::StdString::fromString<int>(a->GetText());
+                            }
+
+                            thing->SetBorderFill(col.r, col.g, col.b, col.a);
+                        }
+                    }
+                } else {
+                    theStatus = false;
+                    return;
+                }
+            }
+
+            // Implements IAttributable
+            if (XMLElement *properties = node->FirstChildElement("properties")) {
+                if (IAttributable *thing = dynamic_cast<IAttributable *>(theNode)) {
+                    XMLElement *property = properties->FirstChildElement("property");
+                    std::string key, value;
+
+                    while (property) {
+                        key = property->Attribute("name");
+                        value = (property->GetText()) ? property->GetText() : "";
+
+                        thing->setAttribute(key, value);
+
+                        property = property->NextSiblingElement();
+                    }
+                } else {
+                    theStatus = false;
+                    return;
+                }
+            }
+
+            theModel->addNode(theNode);
+
+            node = node->NextSiblingElement();
+        }
+    }
+
+    // Relations Block
+    {
+        XMLElement *relations = root->FirstChildElement("relations");
+
+        if (!relations) {
+            theStatus = true; // It's okay if nothing is connected (yet)
+            return;
+        }
+
+        XMLElement *relation = relations->FirstChildElement("relation");
+
+        int _tmp;
+
+        while (relation) {
+            IRelation *theRelation = NULL;
+            const INode *thisNode = NULL, *thatNode = NULL;
+
+            if (XML_SUCCESS == relation->QueryIntAttribute("type", &_tmp)) {
+                theRelation = RelationFactory::makeRelation(static_cast<RelationType>(_tmp));
+
+                if (NULL == theRelation) {
+                    theStatus = false;
+                    return;
+                }
+            } else {
+                theStatus = false;
+                return;
+            }
+
+            if (XML_SUCCESS == relation->QueryIntAttribute("source", &_tmp)) {
+                thisNode = theModel->getNode(static_cast<uint16_t>(_tmp));
+
+                if (!thisNode) {
+                    theStatus = false;
+                    return;
+                }
+            } else {
+                theStatus = false;
+                return;
+            }
+
+            if (XML_SUCCESS == relation->QueryIntAttribute("target", &_tmp)) {
+                thatNode = theModel->getNode(static_cast<uint16_t>(_tmp));
+
+                if (!thisNode) {
+                    theStatus = false;
+                    return;
+                }
+            } else {
+                theStatus = false;
+                return;
+            }
+
+            if (XMLElement *style = relation->FirstChildElement("style")) {
+                if (IStylable *thing = dynamic_cast<IStylable *>(theRelation)) {
+                    if (XMLElement *fill = style->FirstChildElement("fill")) {
+                        if (XMLElement *colour = fill->FirstChildElement("colour")) {
+                            Colour col;
+
+                            if (XMLElement *r = colour->FirstChildElement("r")) {
+                                col.r = Util::StdString::fromString<int>(r->GetText());
+                            }
+
+                            if (XMLElement *g = colour->FirstChildElement("g")) {
+                                col.g = Util::StdString::fromString<int>(g->GetText());
+                            }
+
+                            if (XMLElement *b = colour->FirstChildElement("b")) {
+                                col.b = Util::StdString::fromString<int>(b->GetText());
+                            }
+
+                            if (XMLElement *a = colour->FirstChildElement("a")) {
+                                col.a = Util::StdString::fromString<int>(a->GetText());
+                            }
+
+                            thing->SetFill(col.r, col.g, col.b, col.a);
+                        }
+                    }
+
+                    if (XMLElement *line = style->FirstChildElement("line")) {
+                        if (XMLElement *colour = line->FirstChildElement("colour")) {
+                            Colour col;
+
+                            if (XMLElement *r = colour->FirstChildElement("r")) {
+                                col.r = Util::StdString::fromString<int>(r->GetText());
+                            }
+
+                            if (XMLElement *g = colour->FirstChildElement("g")) {
+                                col.g = Util::StdString::fromString<int>(g->GetText());
+                            }
+
+                            if (XMLElement *b = colour->FirstChildElement("b")) {
+                                col.b = Util::StdString::fromString<int>(b->GetText());
+                            }
+
+                            if (XMLElement *a = colour->FirstChildElement("a")) {
+                                col.a = Util::StdString::fromString<int>(a->GetText());
+                            }
+
+                            thing->SetBorderFill(col.r, col.g, col.b, col.a);
+                        }
+                    }
+                } else {
+                    theStatus = false;
+                    return;
+                }
+            }
+
+            theModel->relate(theRelation, thisNode, thatNode);
+
+            relation = relation->NextSiblingElement();
+        }
+    }
+
+    theStatus = true;
 }
 
 void ModelMapper::save(const std::string &theFile, const IDocumentModel *theModel, bool &theStatus)

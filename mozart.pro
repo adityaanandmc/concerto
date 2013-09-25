@@ -77,7 +77,14 @@ HEADERS  += concerto.h \
     IModelMapper.h \
     ModelMapper.h \
     StdStringUtil.h \
-    NodePropertiesDialog.h
+    NodePropertiesDialog.h \
+    Undoable/InsertNode.h \
+    NodeUtil.h \
+    RelationUtil.h \
+    Undoable/InsertRelation.h \
+    Undoable/RemoveNode.h \
+    Undoable/RemoveRelation.h \
+    Undoable/MoveNode.h
 
 FORMS    += concerto.ui \
     nodepropertiesdialog.ui

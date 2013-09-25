@@ -133,7 +133,12 @@ void DiagramItem::addArrow(Arrow *arrow)
 
 void DiagramItem::setText(const QString& theText)
 {
-    this->theText->setPlainText(theText);
+    this->theText->setHtml(theText);
+}
+
+void DiagramItem::setLabelPos(qreal x, qreal y)
+{
+    theText->setPos(x, y);
 }
 
 QPixmap DiagramItem::getImage() const

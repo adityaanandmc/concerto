@@ -3,10 +3,12 @@
 
 #include <QGraphicsView>
 #include <QMenu>
+#include <QUndoStack>
 
 #include <memory>
 
 #include "Diagram/DiagramScene.h"
+#include "IDocumentModel.h"
 
 class DocumentModel;
 
@@ -18,7 +20,23 @@ public:
 
     QString getTitle() const;
 
-    void save(const QString& path);
+    QUndoStack *getUndoStack() const
+    {
+        return theUndoStack;
+    }
+
+    DocumentModel *getModel() const
+    {
+        return theModel.get();
+    }
+
+    DiagramScene *getScene() const
+    {
+        return theScene;
+    }
+
+    bool save(const QString& path);
+    bool load(const QString& path);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -54,7 +72,8 @@ private slots:
     void documentWasModified();
 
     void nodeAdded(const INode *theNode);
-    void relationEstablished(const uint16_t thisNodeId, const uint16_t thatNodeId, const IRelation *theRelation);
+    void nodeRemoved(const uint16_t theId);
+    void relationEstablished(const uint16_t thisNodeId, const uint16_t thatNodeId, const IRelation *theRelation, bool record);
     void nodeNameChanged(const uint16_t theNodeId, const QString& theText);
     void labelPositionChanged(const uint16_t theNodeId, const QPointF& thePosition);
     void nodePositionsMayHaveChanged();
@@ -65,6 +84,9 @@ private slots:
 private:
     DiagramScene *theScene;
     std::auto_ptr<DocumentModel> theModel;
+    QUndoStack *theUndoStack;
+
+    void reflectModel();
 
     double theZoomLevel;
 

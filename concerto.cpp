@@ -1,4 +1,6 @@
 #include <QtWidgets>
+#include <QUndoView>
+#include <QUndoGroup>
 
 #include "concerto.h"
 #include "ui_concerto.h"
@@ -25,6 +27,10 @@ Concerto::Concerto(QWidget *parent) :
         windowMapper, SIGNAL(mapped(QWidget *)),
         this, SLOT(setActiveSubWindow(QWidget *))
     );
+
+    undoGroup = new QUndoGroup(this);
+    undoView = new QUndoView(undoGroup, ui->historyDock);
+    ui->historyDock->setWidget(undoView);
 }
 
 Concerto::~Concerto()
@@ -47,6 +53,7 @@ void Concerto::connectMenuActions()
 {
     // File Menu
     connect(ui->action_New, SIGNAL(triggered()), this, SLOT(newFileAction()));
+    connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(loadTriggered()));
 
     // Edit Menu
 
@@ -584,6 +591,13 @@ void Concerto::saveTriggered()
     activeSubWindow()->save(tr("/home/amrith92/Desktop/test.ucd"));
 }
 
+void Concerto::loadTriggered()
+{
+    newFileAction();
+
+    activeSubWindow()->load(tr("/home/amrith92/Desktop/test.ucd"));
+}
+
 QIcon Concerto::createColourIndicator(const QString &iconPath, const QColor theColour)
 {
     QPixmap pixmap(50, 80);
@@ -703,6 +717,8 @@ DiagramWindow *Concerto::createMdiChild()
     DiagramWindow *theChild = new DiagramWindow(ui->menu_Object);
 
     ui->mdiArea->addSubWindow(theChild);
+    undoGroup->addStack(theChild->getUndoStack());
+    undoGroup->setActiveStack(theChild->getUndoStack());
 
     return theChild;
 }

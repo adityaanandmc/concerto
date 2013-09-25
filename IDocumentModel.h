@@ -29,6 +29,8 @@ struct IDocumentModel : public IDiagram
     virtual const IRelation *getRelation(const INode *thisNode, const INode *thatNode) = 0;
 
     virtual IRelation *grabRelation(const INode *thisNode, const INode *thatNode) = 0;
+
+    virtual std::map<IRelation *, INode *> getRelationMap(const INode *theNode) = 0;
 };
 
 #endif // IDOCUMENTMODEL_H

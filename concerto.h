@@ -8,6 +8,8 @@ class QSignalMapper;
 class QActionGroup;
 class QFontComboBox;
 class QToolButton;
+class QUndoGroup;
+class QUndoView;
 
 namespace Ui {
 class Concerto;
@@ -60,6 +62,7 @@ private slots:
     void lineColourButtonTriggered();
 
     void saveTriggered();
+    void loadTriggered();
 
 private:
     Ui::Concerto *ui;
@@ -67,6 +70,8 @@ private:
     QSignalMapper *windowMapper;
     QActionGroup *pointerGroup;
     QFontComboBox *fontCombo;
+    QUndoGroup *undoGroup;
+    QUndoView *undoView;
 
     QToolButton *fillColourToolButton;
     QToolButton *lineColourToolButton;

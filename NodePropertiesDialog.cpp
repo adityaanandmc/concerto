@@ -56,12 +56,12 @@ const std::map<std::string, std::string> NodePropertiesDialog::getSavedAttribute
 
     attributes.insert(std::make_pair<std::string, std::string>("Design Scope", ui->designScopeComboBox->currentText().toStdString().c_str()));
     attributes.insert(std::make_pair<std::string, std::string>("Goal Level", ui->goalLevelComboBox->currentText().toStdString().c_str()));
-    attributes.insert(std::make_pair<std::string, std::string>("Main Success Scenario", ui->mainSuccessScenarioTextBox->toHtml().toHtmlEscaped().toStdString().c_str()));
-    attributes.insert(std::make_pair<std::string, std::string>("Success Guarantees", ui->successGuaranteesTextBox->toHtml().toHtmlEscaped().toStdString().c_str()));
-    attributes.insert(std::make_pair<std::string, std::string>("Minimal Guarantees", ui->minimalGuaranteesTextBox->toHtml().toHtmlEscaped().toStdString().c_str()));
-    attributes.insert(std::make_pair<std::string, std::string>("Notes", ui->notesTextBox->toHtml().toHtmlEscaped().toStdString().c_str()));
-    attributes.insert(std::make_pair<std::string, std::string>("Trigger", ui->triggerTextBox->toHtml().toHtmlEscaped().toStdString().c_str()));
-    attributes.insert(std::make_pair<std::string, std::string>("Pre Conditions", ui->preConditionsTextBox->toHtml().toHtmlEscaped().toStdString().c_str()));
+    attributes.insert(std::make_pair<std::string, std::string>("Main Success Scenario", ui->mainSuccessScenarioTextBox->toHtml().toStdString().c_str()));
+    attributes.insert(std::make_pair<std::string, std::string>("Success Guarantees", ui->successGuaranteesTextBox->toHtml().toStdString().c_str()));
+    attributes.insert(std::make_pair<std::string, std::string>("Minimal Guarantees", ui->minimalGuaranteesTextBox->toHtml().toStdString().c_str()));
+    attributes.insert(std::make_pair<std::string, std::string>("Notes", ui->notesTextBox->toHtml().toStdString().c_str()));
+    attributes.insert(std::make_pair<std::string, std::string>("Trigger", ui->triggerTextBox->toHtml().toStdString().c_str()));
+    attributes.insert(std::make_pair<std::string, std::string>("Pre Conditions", ui->preConditionsTextBox->toHtml().toStdString().c_str()));
 
     return attributes;
 }

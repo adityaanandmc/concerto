@@ -23,6 +23,12 @@ public:
     void setItemColour(const QColor &colour);
     void setFont(const QFont &font);
 
+    void insertNode(INode *theNode, std::map<IRelation *, INode *> theRelationMap);
+    void removeNode(INode *theNode);
+    void createRelation(IRelation *theRelation, INode *thisNode, INode *thatNode);
+    void removeRelation(INode *thisNode, INode *thatNode);
+    void moveNode(INode *theNode);
+
     const QColor& getTextColour() const
     {
         return theTextColour;
@@ -40,7 +46,8 @@ public:
     
 signals:
     void itemInserted(const INode *theNode);
-    void relationEstablished(const uint16_t thisNodeId, const uint16_t thatNodeId, const IRelation *theRelation);
+    void itemRemoved(const uint16_t theId);
+    void relationEstablished(const uint16_t thisNodeId, const uint16_t thatNodeId, const IRelation *theRelation, bool record);
     void itemSelected(QGraphicsItem *item);
     void changeNodeName(const uint16_t theNodeId, const QString& theName);
     void changeLabelPosition(const uint16_t theNodeId, const QPointF& thePosition);
@@ -65,7 +72,6 @@ protected:
 
 private:
     bool isItemChange(int type);
-
     void addNode(QPointF thePlace);
 
     NodeType theItemType;

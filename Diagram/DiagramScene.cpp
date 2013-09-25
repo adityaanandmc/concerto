@@ -124,27 +124,7 @@ void DiagramScene::editorHasFocus(DiagramTextItem *item)
 
 void DiagramScene::addNode(QPointF thePlace)
 {
-    DiagramItem *item;
-
-    item = new DiagramItem(theItemType, theItemMenu);
-
-    QPen aPen = item->pen();
-    aPen.setBrush(theLineColour);
-
-    item->setBrush(theItemColour);
-    item->setPen(aPen);
-
-    addItem(item);
-
-    item->setPos(thePlace);
-    item->setId(DiagramScene::theGeneration);
-
     INode *theNode = NodeFactory::makeNode(theItemType);
-    item->setText(tr("Node %1").arg(DiagramScene::theGeneration));
-
-    connect(item->getText(), SIGNAL(lostFocus(DiagramTextItem*)), this, SLOT(editorLostFocus(DiagramTextItem*)));
-    connect(item->getText(), SIGNAL(selectedChange(DiagramTextItem*)), this, SLOT(nodeLabelPositionChanged(DiagramTextItem*)));
-    connect(item->getText(), SIGNAL(gainedFocus(DiagramTextItem*)), this, SLOT(editorHasFocus(DiagramTextItem*)));
 
     if (ILabelizable *mutator = dynamic_cast<ILabelizable *>(theNode)) {
         mutator->setName(tr("Node %1").arg(DiagramScene::theGeneration).toStdString());
@@ -165,6 +145,167 @@ void DiagramScene::addNode(QPointF thePlace)
     }
 
     emit itemInserted(theNode);
+}
+
+void DiagramScene::removeNode(INode *theNode)
+{
+    IIdentifiable *id = dynamic_cast<IIdentifiable *>(theNode);
+
+    if (!id) {
+        return;
+    }
+
+    foreach (QGraphicsItem *item, items()) {
+        if (DiagramItem *theItem = dynamic_cast<DiagramItem *>(item)) {
+            if (theItem->getId() == id->getId()) {
+                removeItem(item);
+                break;
+            }
+        }
+    }
+}
+
+void DiagramScene::insertNode(INode *theNode, std::map<IRelation *, INode *> theRelationMap)
+{
+    DiagramItem *item;
+
+    item = new DiagramItem(theNode->getType(), theItemMenu);
+
+    if (IIdentifiable *mutator = dynamic_cast<IIdentifiable *>(theNode)) {
+        item->setId(mutator->getId());
+        theGeneration = (mutator->getId() > theGeneration) ? mutator->getId() + 1 : theGeneration;
+    }
+
+    if (IStylable *mutator = dynamic_cast<IStylable *>(theNode)) {
+        QColor qcolour;
+        Colour col = mutator->GetFill();
+
+        qcolour.setRgb(col.r, col.g, col.b, col.a);
+        item->setBrush(qcolour);
+
+        col = mutator->GetBorderFill();
+
+        qcolour.setRgb(col.r, col.g, col.b, col.a);
+        QPen aPen = item->pen();
+        aPen.setBrush(qcolour);
+
+        item->setPen(aPen);
+    }
+
+    if (ILabelizable *mutator = dynamic_cast<ILabelizable *>(theNode)) {
+        item->setText(QString::fromStdString(mutator->getName()));
+        item->setLabelPos(mutator->getLabelX(), mutator->getLabelY());
+    }
+
+    addItem(item);
+
+    if (IPositionable *mutator = dynamic_cast<IPositionable *>(theNode)) {
+        item->setPos(mutator->getX(), mutator->getY());
+        item->setZValue(mutator->getZ());
+    }
+
+    connect(item->getText(), SIGNAL(lostFocus(DiagramTextItem*)), this, SLOT(editorLostFocus(DiagramTextItem*)));
+    connect(item->getText(), SIGNAL(selectedChange(DiagramTextItem*)), this, SLOT(nodeLabelPositionChanged(DiagramTextItem*)));
+    connect(item->getText(), SIGNAL(gainedFocus(DiagramTextItem*)), this, SLOT(editorHasFocus(DiagramTextItem*)));
+
+    if (theRelationMap.size() > 0) {
+        std::map<IRelation *, INode *>::const_iterator it, end = theRelationMap.end();
+
+        IIdentifiable *thisOne = dynamic_cast<IIdentifiable *>(theNode);
+
+        for (it = theRelationMap.begin(); it != end; ++it) {
+            IIdentifiable *theOther = dynamic_cast<IIdentifiable *>(it->second);
+
+            emit relationEstablished(thisOne->getId(), theOther->getId(), it->first, false);
+        }
+    }
+}
+
+void DiagramScene::createRelation(IRelation *theRelation, INode *thisNode, INode *thatNode)
+{
+    DiagramItem *thisItem, *thatItem;
+
+    thisItem = thatItem = NULL;
+
+    foreach (QGraphicsItem *item, items()) {
+        if (DiagramItem *it = dynamic_cast<DiagramItem *>(item)) {
+            if (IIdentifiable *thing = dynamic_cast<IIdentifiable *>(thisNode)) {
+                if (thing->getId() == it->getId()) {
+                    thisItem = it;
+                }
+            }
+
+            if (IIdentifiable *thing = dynamic_cast<IIdentifiable *>(thatNode)) {
+                if (thing->getId() == it->getId()) {
+                    thatItem = it;
+                }
+            }
+        }
+
+        if (thisItem && thatItem) {
+            break;
+        }
+    }
+
+    bool isClear = Node::relatableWith(thisNode->getType(), thatNode->getType());
+
+    if (isClear) {
+        Arrow *arrow = new Arrow(thisItem, thatItem, theRelation->getType());
+
+        if (IStylable *style = dynamic_cast<IStylable *>(theRelation)) {
+            Colour col = style->GetBorderFill();
+
+            arrow->setColor(QColor(col.r, col.g, col.b, col.a));
+        }
+
+        thisItem->addArrow(arrow);
+        thatItem->addArrow(arrow);
+        arrow->setZValue(-1000.0);
+        addItem(arrow);
+        arrow->updatePosition();
+    }
+}
+
+void DiagramScene::removeRelation(INode *thisNode, INode *thatNode)
+{
+    uint16_t thisId = dynamic_cast<IIdentifiable *>(thisNode)->getId(),
+             thatId = dynamic_cast<IIdentifiable *>(thatNode)->getId();
+
+    foreach (QGraphicsItem *item, items()) {
+        if (Arrow *arrow = dynamic_cast<Arrow *>(item)) {
+            if (arrow->startItem()->getId() == thisId && arrow->endItem()->getId() == thatId) {
+                arrow->startItem()->removeArrow(arrow);
+                arrow->endItem()->removeArrow(arrow);
+                removeItem(arrow);
+            }
+        }
+    }
+}
+
+void DiagramScene::moveNode(INode *theNode)
+{
+    QPointF thePosition;
+    uint16_t theId;
+
+    if (IPositionable *pos = dynamic_cast<IPositionable *>(theNode)) {
+        thePosition.setX(pos->getX());
+        thePosition.setY(pos->getY());
+    } else {
+        return;
+    }
+
+    if (IIdentifiable *idfy = dynamic_cast<IIdentifiable *>(theNode)) {
+        theId = idfy->getId();
+    }
+
+    foreach (QGraphicsItem *item, items()) {
+        if (DiagramItem *it = dynamic_cast<DiagramItem *>(item)) {
+            if (it->getId() == theId) {
+                it->setPos(thePosition);
+                break;
+            }
+        }
+    }
 }
 
 void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -212,7 +353,6 @@ void DiagramScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
         line->setLine(newLine);
     } else if (theMode == MoveItem) {
         QGraphicsScene::mouseMoveEvent(mouseEvent);
-        emit itemsMayHaveMoved();
     }
 }
 
@@ -245,19 +385,15 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
             bool isClear = Node::relatableWith(startItem->getType(), endItem->getType());
 
             if (isClear) {
-                Arrow *arrow = new Arrow(startItem, endItem, theLineType);
-                arrow->setColor(theLineColour);
-                startItem->addArrow(arrow);
-                endItem->addArrow(arrow);
-                arrow->setZValue(-1000.0);
-                addItem(arrow);
-                arrow->updatePosition();
-
                 IRelation *theRelation = RelationFactory::makeRelation(theLineType);
 
-                emit relationEstablished(startItem->getId(), endItem->getId(), theRelation);
+                emit relationEstablished(startItem->getId(), endItem->getId(), theRelation, true);
             }
         }
+    }
+
+    if (theMode == MoveItem) {
+        emit itemsMayHaveMoved();
     }
 
     line = 0;

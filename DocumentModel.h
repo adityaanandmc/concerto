@@ -64,6 +64,8 @@ public:
 
     IRelation *grabRelation(const INode *thisNode, const INode *thatNode);
 
+    std::map<IRelation *, INode *> getRelationMap(const INode *theNode);
+
 protected:
     GraphType theGraph;
     std::auto_ptr<IAuthor> theAuthor;

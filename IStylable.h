@@ -8,6 +8,12 @@ typedef struct __Colour {
         g,
         b,
         a;
+
+    __Colour()
+    {
+        r = g = b = 0;
+        a = 255;
+    }
 } Colour;
 
 class QColor;

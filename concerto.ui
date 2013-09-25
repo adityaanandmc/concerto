@@ -28,7 +28,7 @@
  QDockWidget::title {
      text-align: left;
      background: qlineargradient(spread:pad, x1:0.481, y1:0, x2:0.495, y2:1, stop:0 rgba(72, 72, 72, 255), stop:0.480952 rgba(41, 41, 41, 255), stop:0.485714 rgba(43, 43, 43, 255), stop:1 rgba(66, 66, 66, 255));
-     padding-left: 35px;
+     padding-left: 5px;
  }
 
 QToolBar {
@@ -1152,6 +1152,54 @@ QToolButton::menu-button:hover {
    <addaction name="action_Italicize"/>
    <addaction name="action_Underline"/>
    <addaction name="separator"/>
+  </widget>
+  <widget class="QDockWidget" name="historyDock">
+   <property name="toolTip">
+    <string>Undo &amp; Redo</string>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"> QUndoView {
+     show-decoration-selected: 1; /* make the selection span the entire width of the view */
+	
+	background-color: qlineargradient(spread:pad, x1:0.49, y1:0.0227273, x2:0.472, y2:0.994318, stop:0 rgba(136, 136, 136, 255), stop:0.242857 rgba(157, 157, 157, 255), stop:0.871429 rgba(133, 119, 129, 255), stop:1 rgba(125, 111, 121, 255));
+
+	border: 0;
+ }
+
+QUndoView::item {
+	padding: 3px;
+}
+
+ QUndoView::item:alternate {
+     background: #D8D8D8;
+ }
+
+ QUndoView::item:selected {
+     border: 1px solid #5F5F5F;
+ }
+
+ QUndoView::item:selected:!active {
+     background: qlineargradient(spread:reflect, x1:0.505, y1:0.028, x2:0.509, y2:0.477, stop:0.128571 rgba(163, 163, 163, 255), stop:1 rgba(145, 145, 145, 255));
+ }
+
+ QUndoView::item:selected:active {
+     background: qlineargradient(spread:reflect, x1:0.505, y1:0.028, x2:0.509, y2:0.477, stop:0 rgba(90, 90, 90, 255), stop:0.847619 rgba(64, 64, 64, 255));
+ }
+
+ QUndoView::item:hover {
+     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #E6E6E6, stop: 1 #C9C9C9);
+ }</string>
+   </property>
+   <property name="windowTitle">
+    <string>Document History</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_2"/>
+   </widget>
   </widget>
   <action name="action_New">
    <property name="icon">

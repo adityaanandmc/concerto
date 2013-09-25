@@ -130,6 +130,26 @@ IRelation *DocumentModel::grabRelation(const INode *thisNode, const INode *thatN
     return NULL;
 }
 
+std::map<IRelation *, INode *> DocumentModel::getRelationMap(const INode *theNode)
+{
+    edge_iterator_t ei, ei_end, next;
+    vertex_t theVertex = *findNode(theNode);
+
+    std::map<IRelation *, INode *> relMap;
+
+    boost::tie(ei, ei_end) = boost::edges(theGraph);
+    for (next = ei; ei != ei_end; ei = next) {
+        ++next;
+
+        if (theVertex == boost::source(*ei, theGraph)) {
+            vertex_t otherVertex = boost::target(*ei, theGraph);
+            relMap.insert(std::make_pair<IRelation *, INode *>(theGraph[*ei].theRelation, theGraph[otherVertex].theNode));
+        }
+    }
+
+    return relMap;
+}
+
 vertex_iterator_t DocumentModel::findNode(const INode *theNode)
 {
     vertex_iterator_t vi, vi_end, next;

@@ -67,6 +67,8 @@ public:
         return theText;
     }
 
+    void setLabelPos(qreal x, qreal y);
+
 protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
