@@ -43,6 +43,11 @@ public:
     {
         return theLineColour;
     }
+
+    static void progressGeneration()
+    {
+        ++theGeneration;
+    }
     
 signals:
     void itemInserted(const INode *theNode);

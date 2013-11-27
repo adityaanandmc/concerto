@@ -20,6 +20,16 @@ public:
 
     QString getTitle() const;
 
+    const QString& getSavePath() const
+    {
+        return theSavePath;
+    }
+
+    void setSavePath(const QString str)
+    {
+        theSavePath = str;
+    }
+
     QUndoStack *getUndoStack() const
     {
         return theUndoStack;
@@ -35,8 +45,12 @@ public:
         return theScene;
     }
 
-    bool save(const QString& path);
-    bool load(const QString& path);
+    bool save();
+    bool saveAs(const QString path);
+    bool load(const QString path);
+
+    void print();
+    void exportTo(const QString path);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -51,6 +65,8 @@ signals:
     void formatMenuDisable();
     void formatMenuEnable();
     void formatFontSettingsChange(const QFont);
+    void outputToConsole(const QString);
+    void documentWasModified();
 
 public slots:
     void setItemType(int theItemType);
@@ -67,10 +83,11 @@ public slots:
     void imbueFillColour(const QColor& theColour);
     void imbueLineColour(const QColor& theColour);
     void propertiesRequested();
+    void validate();
+    void tabulateModel();
+    void modelPropertiesRequested();
     
 private slots:
-    void documentWasModified();
-
     void nodeAdded(const INode *theNode);
     void nodeRemoved(const uint16_t theId);
     void relationEstablished(const uint16_t thisNodeId, const uint16_t thatNodeId, const IRelation *theRelation, bool record);
@@ -85,8 +102,11 @@ private:
     DiagramScene *theScene;
     std::auto_ptr<DocumentModel> theModel;
     QUndoStack *theUndoStack;
+    QString theSavePath;
 
     void reflectModel();
+
+    void followFlow(vertex_t theVertex, int& subFlowCount, int& altFlowCount, int& secFlowCount, int& extendsCount, int& includesCount);
 
     double theZoomLevel;
 

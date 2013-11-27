@@ -43,6 +43,11 @@ public:
         return theAuthor.get();
     }
 
+    IAuthor *grabAuthor() const
+    {
+        return theAuthor.get();
+    }
+
     void setAuthor(const IAuthor *theAuthor)
     {
         this->theAuthor.reset(const_cast<IAuthor *>(theAuthor)); // quirk; must for const-correctness
@@ -65,6 +70,10 @@ public:
     IRelation *grabRelation(const INode *thisNode, const INode *thatNode);
 
     std::map<IRelation *, INode *> getRelationMap(const INode *theNode);
+
+    std::vector<vertex_t> getTargetVertices(vertex_t theSourceVertex);
+
+    bool validate();
 
 protected:
     GraphType theGraph;

@@ -1,4 +1,12 @@
-#include <QtWidgets>
+#ifdef QT_WIDGETS_LIB
+    #include <QtWidgets>
+    #include <QtPrintSupport/QPrinter>
+    #include <QtPrintSupport/QPrintDialog>
+#else
+    #include <QtGui>
+    #include <QPrinter>
+    #include <QPrintDialog>
+#endif
 #include "diagramwindow.h"
 #include "DocumentModel.h"
 #include "ModelMapper.h"
@@ -6,6 +14,7 @@
 #include "IPositionable.h"
 #include "IStylable.h"
 #include "NodePropertiesDialog.h"
+#include "ModelPropertiesDialog.h"
 #include "Undoable/InsertNode.h"
 #include "Undoable/InsertRelation.h"
 #include "Undoable/RemoveNode.h"
@@ -86,18 +95,7 @@ void DiagramWindow::zoomOut()
 
 void DiagramWindow::fitWindow()
 {
-    QList<QGraphicsItem *> items = theScene->items();
-    QRectF box;
-
-    foreach (QGraphicsItem *item, items) {
-        box |= item->boundingRect();
-    }
-
-    if (box.width() == 0) {
-        box = sceneRect();
-    }
-
-    fitInView(box, Qt::KeepAspectRatio);
+    fitInView(theScene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
 void DiagramWindow::resetZoom()
@@ -186,11 +184,6 @@ void DiagramWindow::sendBackward()
     foreach (QGraphicsItem *it, theScene->selectedItems()) {
         it->setZValue(zValue);
     }
-}
-
-void DiagramWindow::documentWasModified()
-{
-
 }
 
 QString DiagramWindow::getTitle() const
@@ -285,6 +278,17 @@ void DiagramWindow::propertiesRequested()
     }
 }
 
+void DiagramWindow::modelPropertiesRequested()
+{
+    ModelPropertiesDialog *prop = new ModelPropertiesDialog(theSavePath, QString::fromStdString(theModel->getTitle()), QString::fromStdString(theModel->getAuthor()->getName()), QString::fromStdString(theModel->getDescription()), this);
+
+    if (prop->exec() == QDialog::Accepted) {
+        theModel->setTitle(prop->getModelName().toStdString());
+        theModel->setDescription(prop->getDescription().toStdString());
+        theModel->grabAuthor()->setName(prop->getAuthor().toStdString());
+    }
+}
+
 void DiagramWindow::nodeAdded(const INode *theNode)
 {
     theUndoStack->push(new InsertNode(this, theNode));
@@ -351,7 +355,17 @@ void DiagramWindow::nodePositionsMayHaveChanged()
     }
 }
 
-bool DiagramWindow::save(const QString& path)
+bool DiagramWindow::save()
+{
+    ModelMapper theMapper;
+    bool fFlag = true;
+
+    theMapper.save(theSavePath.toStdString(), theModel.get(), fFlag);
+
+    return fFlag;
+}
+
+bool DiagramWindow::saveAs(const QString path)
 {
     ModelMapper theMapper;
     bool fFlag = true;
@@ -361,18 +375,244 @@ bool DiagramWindow::save(const QString& path)
     return fFlag;
 }
 
-bool DiagramWindow::load(const QString &path)
+bool DiagramWindow::load(const QString path)
 {
     ModelMapper theMapper;
     bool fFlag = true;
 
     theMapper.load(path.toStdString(), theModel.get(), fFlag);
 
+    theSavePath = path;
+
     if (fFlag) {
         reflectModel();
     }
 
     return fFlag;
+}
+
+void DiagramWindow::validate()
+{
+    if (theModel->validate()) {
+        emit outputToConsole(tr("<h3>Model is valid.</h3>"));
+    } else {
+        emit outputToConsole(tr("<h3>Model is invalid.</h3>"));
+    }
+}
+
+void DiagramWindow::print()
+{
+#ifndef QT_NO_PRINTER
+    QPrinter printer(QPrinter::HighResolution);
+
+    QPrintDialog *dialog = new QPrintDialog(&printer, this);
+    dialog->setWindowTitle(tr("Print Document %1").arg(theModel->getTitle().c_str()));
+    printer.setOutputFileName(tr("%1.pdf").arg(theModel->getTitle().c_str()));
+    printer.setColorMode(QPrinter::Color);
+    printer.setCopyCount(1);
+    printer.setCollateCopies(true);
+    printer.setPrinterName(QString::fromUtf8("Default Printer"));
+    printer.setPageSize(QPrinter::A4);
+    printer.setOrientation(QPrinter::Landscape);
+    printer.setPageMargins(5, 5, 5, 5, QPrinter::Millimeter);
+
+    if(dialog->exec() == QDialog::Accepted) {
+        QPainter painter;
+        painter.begin(&printer);
+
+        theScene->render(&painter, printer.pageRect(), theScene->itemsBoundingRect(), Qt::KeepAspectRatio);
+    }
+#endif // QT_NO_PRINTER
+}
+
+void DiagramWindow::exportTo(const QString path)
+{
+    theScene->clearSelection();
+    theScene->setSceneRect(theScene->itemsBoundingRect());
+
+    QImage image(theScene->sceneRect().size().toSize(), QImage::Format_ARGB32);
+    image.fill(Qt::transparent);
+
+    if (path.endsWith(tr(".jpeg"))) {
+        image.fill(Qt::white);
+    }
+
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    theScene->render(&painter);
+    image.save(path);
+}
+
+void DiagramWindow::followFlow(vertex_t theVertex, int &subFlowCount, int &altFlowCount, int &secFlowCount, int &extendsCount, int &includesCount)
+{
+    GraphType theGraph = theModel->getGraph();
+    edge_iterator_t ei, ei_end, next;
+    vertex_t targetVertex;
+    std::vector<vertex_t> targetVertices;
+
+    bool isSubFlow, isAltFlow, isSecFlow;
+
+    isSubFlow = isAltFlow = isSecFlow = false;
+
+    switch (theGraph[theVertex].theNode->getType()) {
+    case SubFlowType:
+        isSubFlow = true;
+        break;
+
+    case SecFlowType:
+        isSecFlow = true;
+        break;
+
+    case AltFlowType:
+        isAltFlow = true;
+        break;
+
+    case UsecaseType:
+        // Check for relation-type
+        boost::tie(ei, ei_end) = boost::edges(theGraph);
+        for (next = ei; ei != ei_end; ei = next) {
+            ++next;
+
+            if (theVertex == boost::source(*ei, theGraph)) {
+                if (ExtensionPointType == theGraph[*ei].theRelation->getType()) {
+                    ++extendsCount;
+                } else if (UsesType == theGraph[*ei].theRelation->getType()) {
+                    ++includesCount;
+                }
+
+                targetVertices.push_back(boost::target(*ei, theGraph));
+            } else if (theVertex == boost::target(*ei, theGraph)) {
+                if (ExtensionPointType == theGraph[*ei].theRelation->getType()) {
+                    ++extendsCount;
+                } else if (UsesType == theGraph[*ei].theRelation->getType()) {
+                    ++includesCount;
+                }
+            }
+        }
+        break;
+
+    default:
+        return;
+    }
+
+    if (isAltFlow || isSecFlow || isSubFlow) {
+        boost::tie(ei, ei_end) = boost::edges(theGraph);
+
+        for (next = ei; ei != ei_end; ei = next) {
+            ++next;
+
+            if (theVertex == boost::source(*ei, theGraph)) {
+                if (ExtensionPointType == theGraph[*ei].theRelation->getType()) {
+                    ++extendsCount;
+                } else if (UsesType == theGraph[*ei].theRelation->getType()) {
+                    ++includesCount;
+                }
+
+                targetVertex = boost::target(*ei, theGraph);
+
+                switch (theGraph[targetVertex].theNode->getType()) {
+                case UsecaseType:
+                    if (isSubFlow) {
+                        ++subFlowCount;
+                    } else if (isSecFlow) {
+                        ++secFlowCount;
+                    } else if (isAltFlow) {
+                        ++altFlowCount;
+                    }
+                    targetVertices.push_back(targetVertex);
+                    break;
+
+                case SubFlowType:
+                case AltFlowType:
+                case SecFlowType:
+                    followFlow(targetVertex, subFlowCount, altFlowCount, secFlowCount, extendsCount, includesCount);
+                    break;
+
+                default:;
+                }
+            }
+        }
+    }
+
+    std::vector<vertex_t> targets;
+
+    std::vector<vertex_t>::const_iterator it, it_end = targetVertices.end(), iit, iit_end;
+    for (it = targetVertices.begin(); it != it_end; ++it) {
+        targets = theModel->getTargetVertices(*it);
+        iit_end = targets.end();
+
+        for (iit = targets.begin(); iit != iit_end; ++iit) {
+            followFlow(*iit, subFlowCount, altFlowCount, secFlowCount, extendsCount, includesCount);
+        }
+    }
+}
+
+void DiagramWindow::tabulateModel()
+{
+    GraphType theGraph = theModel->getGraph();
+
+    QString theHtml = tr("<table border=\"1\" cellpadding=\"4\"><thead><tr><th>The usecase</th><th>Sub Flows</th><th>Alt Flows</th><th>Security Flows</th><th>Extends</th><th>Includes</th><th>Total</th></tr></thead><tbody>");
+
+    {
+        vertex_iterator_t vi, vi_end, next;
+        edge_iterator_t ei, ei_end, enext;
+        vertex_t sourceVertex, targetVertex;
+        int subFlowsCount, altFlowsCount, secFlowsCount, extendsCount, includesCount;
+
+        boost::tie(vi, vi_end) = boost::vertices(theGraph);
+        for (next = vi; vi != vi_end; vi = next) {
+            ++next;
+
+            INode *theNode = theGraph[*vi].theNode;
+            ILabelizable *theLabel = dynamic_cast<ILabelizable *>(theNode);
+
+            if (UsecaseType == theNode->getType()) {
+                theHtml += tr("<tr><td>%1 <small>&lt;&lt; %2 &gt;&gt;</small></td>").arg(theLabel->getName().c_str()).arg(Util::Node::toString(theNode->getType()).c_str());
+
+                subFlowsCount = altFlowsCount = secFlowsCount = extendsCount = includesCount = 0;
+
+                boost::tie(ei, ei_end) = boost::edges(theGraph);
+                for (enext = ei; ei != ei_end; ei = enext) {
+                    ++enext;
+
+                    sourceVertex = boost::source(*ei, theGraph);
+
+                    if (theGraph[sourceVertex].theNode == theNode) {
+                        targetVertex = boost::target(*ei, theGraph);
+
+                        if (ExtensionPointType == theGraph[*ei].theRelation->getType()) {
+                            ++extendsCount;
+                        } else if (UsesType == theGraph[*ei].theRelation->getType()) {
+                            ++includesCount;
+                        }
+
+                        switch(theGraph[targetVertex].theNode->getType()) {
+                        case SubFlowType:
+                            followFlow(targetVertex, subFlowsCount, altFlowsCount, secFlowsCount, extendsCount, includesCount);
+                            break;
+
+                        case AltFlowType:
+                            followFlow(targetVertex, subFlowsCount, altFlowsCount, secFlowsCount, extendsCount, includesCount);
+                            break;
+
+                        case SecFlowType:
+                            followFlow(targetVertex, subFlowsCount, altFlowsCount, secFlowsCount, extendsCount, includesCount);
+                            break;
+
+                        default:;
+                        }
+                    }
+                }
+
+                theHtml += tr("<td style=\"text-align:center;\">%1</td><td style=\"text-align:center;\">%2</td><td style=\"text-align:center;\">%3</td><td style=\"text-align:center;\">%4</td><td style=\"text-align:center;\">%5</td><td style=\"text-align:center;\">%6</td></tr>").arg(subFlowsCount).arg(altFlowsCount).arg(secFlowsCount).arg(extendsCount).arg(includesCount).arg((subFlowsCount + altFlowsCount + secFlowsCount + extendsCount + includesCount));
+            }
+        }
+    }
+
+    theHtml += tr("</tbody></table>");
+
+    emit outputToConsole(theHtml);
 }
 
 void DiagramWindow::handleSelectionChanged()
@@ -441,4 +681,6 @@ void DiagramWindow::reflectModel()
             theScene->createRelation(theRelation, thisNode, thatNode);
         }
     }
+
+    DiagramScene::progressGeneration();
 }

@@ -9,6 +9,8 @@ struct INode
 
     virtual bool canBeSentinel() const = 0;
 
+    virtual bool validatable() const = 0;
+
     virtual const NodeType& getType() const = 0;
 
     virtual void setType(const NodeType theType) = 0;

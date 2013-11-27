@@ -31,6 +31,10 @@ struct IDocumentModel : public IDiagram
     virtual IRelation *grabRelation(const INode *thisNode, const INode *thatNode) = 0;
 
     virtual std::map<IRelation *, INode *> getRelationMap(const INode *theNode) = 0;
+
+    virtual std::vector<vertex_t> getTargetVertices(vertex_t theSourceVertex) = 0;
+
+    virtual bool validate() = 0;
 };
 
 #endif // IDOCUMENTMODEL_H

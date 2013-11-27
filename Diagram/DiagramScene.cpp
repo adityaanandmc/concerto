@@ -111,7 +111,7 @@ void DiagramScene::editorLostFocus(DiagramTextItem *item)
         item->deleteLater();
     } else {
         DiagramItem *theParent = dynamic_cast<DiagramItem *>(item->parentItem());
-        nodeNameChanged(theParent->getId(), item->toHtml().toHtmlEscaped());
+        nodeNameChanged(theParent->getId(), item->toPlainText());
     }
 
     emit formatStateChanged(false);

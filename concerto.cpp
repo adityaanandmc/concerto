@@ -1,6 +1,11 @@
-#include <QtWidgets>
+#ifdef QT_WIDGETS_LIB
+    #include <QtWidgets>
+#else
+    #include <QtGui>
+#endif
 #include <QUndoView>
 #include <QUndoGroup>
+#include <QFileDialog>
 
 #include "concerto.h"
 #include "ui_concerto.h"
@@ -30,7 +35,24 @@ Concerto::Concerto(QWidget *parent) :
 
     undoGroup = new QUndoGroup(this);
     undoView = new QUndoView(undoGroup, ui->historyDock);
+    undoView->setCleanIcon(QIcon(tr(":/icons/images/menu/File/document-save.svg")));
     ui->historyDock->setWidget(undoView);
+
+    ui->menu_Edit->clear();
+    QAction *undoAction = undoGroup->createUndoAction(this);
+    QAction *redoAction = undoGroup->createRedoAction(this);
+
+    undoAction->setIcon(QIcon(tr(":/icons/images/menu/Edit/undo.svg")));
+    redoAction->setIcon(QIcon(tr(":/icons/images/menu/Edit/redo.svg")));
+    undoAction->setShortcut(QKeySequence::Undo);
+    redoAction->setShortcut(QKeySequence::Redo);
+
+    ui->menu_Edit->addAction(undoAction);
+    ui->menu_Edit->addAction(redoAction);
+    ui->menu_Edit->addSeparator();
+    ui->menu_Edit->addAction(ui->action_Preferences);
+    ui->editToolBar->addAction(undoAction);
+    ui->editToolBar->addAction(redoAction);
 }
 
 Concerto::~Concerto()
@@ -54,6 +76,17 @@ void Concerto::connectMenuActions()
     // File Menu
     connect(ui->action_New, SIGNAL(triggered()), this, SLOT(newFileAction()));
     connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(loadTriggered()));
+    connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(saveAsTriggered()));
+    connect(ui->action_Print, SIGNAL(triggered()), this, SLOT(print()));
+
+    QSignalMapper *exportMapper = new QSignalMapper(this);
+    connect(ui->action_JPG_Image, SIGNAL(triggered()), exportMapper, SLOT(map()));
+    connect(ui->action_PNG_Image, SIGNAL(triggered()), exportMapper, SLOT(map()));
+
+    exportMapper->setMapping(ui->action_JPG_Image, 1);
+    exportMapper->setMapping(ui->action_PNG_Image, 2);
+
+    connect(exportMapper, SIGNAL(mapped(int)), this, SLOT(exportTo(int)));
 
     // Edit Menu
 
@@ -65,6 +98,10 @@ void Concerto::connectMenuActions()
     // Tools Menu
 
     // Object Menu
+
+    // Model Menu
+    connect(ui->action_Validate, SIGNAL(triggered()), this, SLOT(validateChild()));
+    connect(ui->action_Summarize, SIGNAL(triggered()), this, SLOT(summarizeChild()));
 
     // Window Menu
     connect(ui->menu_Window, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
@@ -264,11 +301,18 @@ void Concerto::connectFormatActions(DiagramWindow *subWindow)
 void Concerto::connectFileActions(DiagramWindow *subWindow)
 {
     connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(saveTriggered()));
+    connect(ui->actionP_roperties, SIGNAL(triggered()), subWindow, SLOT(modelPropertiesRequested()));
+}
+
+void Concerto::connectModelActions(DiagramWindow *subWindow)
+{
+    connect(subWindow, SIGNAL(outputToConsole(QString)), this, SLOT(appendToConsole(QString)));
 }
 
 void Concerto::newFileAction()
 {
     DiagramWindow *theChild = this->createMdiChild();
+    theChild->setSavePath(tr("default.concerto"));
 
     connectToolBox(theChild);
     connectPointers(theChild);
@@ -277,6 +321,7 @@ void Concerto::newFileAction()
     connectToolActions(theChild);
     connectFormatActions(theChild);
     connectFileActions(theChild);
+    connectModelActions(theChild);
 
     connect(theChild, SIGNAL(destroyed()), this, SLOT(cleanupSubWindow()));
 
@@ -330,6 +375,10 @@ void Concerto::updateMenus()
     ui->actionZoom_Out->setEnabled(hasChildWindows);
     ui->action_Normal->setEnabled(hasChildWindows);
     ui->action_Fit_to_Window->setEnabled(hasChildWindows);
+    ui->action_Validate->setEnabled(hasChildWindows);
+    ui->action_Summarize->setEnabled(hasChildWindows);
+    ui->action_JPG_Image->setEnabled(hasChildWindows);
+    ui->action_PNG_Image->setEnabled(hasChildWindows);
 
     fontCombo->setEnabled(hasChildWindows);
 }
@@ -586,16 +635,117 @@ void Concerto::underline(bool makeUnderline)
     activeSubWindow()->setFont(theFont);
 }
 
+void Concerto::appendToConsole(const QString str)
+{
+    QString old = tr("<pre style=\"color:#9C9C9C;\">");
+    old += ui->consoleTextEdit->toPlainText();
+    old += tr("</pre>");
+
+    ui->consoleTextEdit->setHtml(old);
+    ui->consoleTextEdit->append(str);
+    ui->consoleTextEdit->verticalScrollBar()->setValue(ui->consoleTextEdit->verticalScrollBar()->maximum());
+}
+
 void Concerto::saveTriggered()
 {
-    activeSubWindow()->save(tr("/home/amrith92/Desktop/test.ucd"));
+    if (undoGroup->activeStack()->isClean()) {
+        return;
+    }
+
+    if (activeSubWindow()->save()) {
+        undoGroup->activeStack()->setClean();
+        statusBar()->showMessage(tr("Successfully Saved to %1").arg(activeSubWindow()->getSavePath()), 1000);
+    } else {
+        QMessageBox::warning(this, tr("Save failed!"), tr("File could not be saved!"));
+    }
+}
+
+void Concerto::saveAsTriggered()
+{
+    DiagramWindow *theWindow = activeSubWindow();
+
+    if (!theWindow) {
+        return;
+    }
+
+    QString savePath = QFileDialog::getSaveFileName(this, tr("Save Model As"), tr("./"), tr("Concerto Files (*.concerto)"));
+
+    if (!savePath.endsWith(tr(".concerto"))) {
+        savePath += tr(".concerto");
+    }
+
+    theWindow->setSavePath(savePath);
+
+    if (theWindow->save()) {
+        undoGroup->activeStack()->setClean();
+        statusBar()->showMessage(tr("Successfully Saved to %1").arg(savePath), 1000);
+    } else {
+        QMessageBox::warning(this, tr("Save failed!"), tr("File could not be saved!"));
+    }
 }
 
 void Concerto::loadTriggered()
 {
-    newFileAction();
+    QString theFilePath = QFileDialog::getOpenFileName(this, tr("Open a Diagram"), tr("./"), tr("Concerto Files (*.concerto)"));
 
-    activeSubWindow()->load(tr("/home/amrith92/Desktop/test.ucd"));
+    if (theFilePath.size() <= 0) {
+        return;
+    }
+
+    newFileAction();
+    if (activeSubWindow()->load(theFilePath)) {
+        statusBar()->showMessage(tr("Successfully Loaded %1").arg(theFilePath), 1000);
+    } else {
+        QMessageBox::warning(this, tr("Load failed!"), tr("File could not be loaded!"));
+    }
+}
+
+void Concerto::validateChild()
+{
+    activeSubWindow()->validate();
+}
+
+void Concerto::summarizeChild()
+{
+    activeSubWindow()->tabulateModel();
+}
+
+void Concerto::print()
+{
+    activeSubWindow()->print();
+}
+
+void Concerto::exportTo(const int option)
+{
+    DiagramWindow *theWindow = activeSubWindow();
+
+    if (!theWindow) {
+        return;
+    }
+
+    QString type = (option == 1) ? tr("JPG") : tr("PNG");
+
+    QString savePath;
+
+    switch (option) {
+    case 1:
+        savePath = QFileDialog::getSaveFileName(this, tr("Export Model to %1").arg(type), tr("./"), tr("JPEG Image Files (*.jpeg)"));
+
+        if (!savePath.endsWith(tr(".jpeg"))) {
+            savePath += tr(".jpeg");
+        }
+        break;
+
+    case 2:
+        savePath = QFileDialog::getSaveFileName(this, tr("Export Model to %1").arg(type), tr("./"), tr("PNG Image Files (*.png)"));
+
+        if (!savePath.endsWith(tr(".png"))) {
+            savePath += tr(".png");
+        }
+        break;
+    }
+
+    theWindow->exportTo(savePath);
 }
 
 QIcon Concerto::createColourIndicator(const QString &iconPath, const QColor theColour)

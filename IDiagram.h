@@ -19,6 +19,8 @@ struct IDiagram
 
     virtual const IAuthor *getAuthor() const = 0;
 
+    virtual IAuthor *grabAuthor() const = 0;
+
     virtual void setAuthor(const IAuthor *theAuthor) = 0;
 };
 

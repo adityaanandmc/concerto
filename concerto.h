@@ -62,7 +62,16 @@ private slots:
     void lineColourButtonTriggered();
 
     void saveTriggered();
+    void saveAsTriggered();
     void loadTriggered();
+
+    void validateChild();
+    void summarizeChild();
+
+    void appendToConsole(const QString str);
+
+    void print();
+    void exportTo(const int);
 
 private:
     Ui::Concerto *ui;
@@ -95,6 +104,7 @@ private:
     void connectToolActions(DiagramWindow *subWindow);
     void connectFormatActions(DiagramWindow *subWindow);
     void connectFileActions(DiagramWindow *subWindow);
+    void connectModelActions(DiagramWindow *subWindow);
     DiagramWindow *activeSubWindow();
 };
 

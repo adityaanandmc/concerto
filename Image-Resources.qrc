@@ -67,5 +67,8 @@
         <file>images/dock/noise.png</file>
         <file>images/toolbar/format/arrow_down.png</file>
         <file>images/toolbar/format/arrow_down_white.png</file>
+        <file>images/toolbar/model/invest-applet.svg</file>
+        <file>images/toolbar/model/user-available.svg</file>
+        <file>images/toolbar/format/arrow_up.png</file>
     </qresource>
 </RCC>

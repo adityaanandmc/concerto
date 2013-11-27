@@ -71,27 +71,27 @@ DiagramItem::DiagramItem(NodeType theType, QMenu *theMenu, QGraphicsItem *thePar
 
     case GeomSquareType:
         setPen(QPen(Qt::black, 6));
-        path.addRect(-50, -50, 100, 100);
+        path.addRect(-25, -25, 50, 50);
         setPen(QPen(Qt::black, 2));
-        path.addRect(-45, -45, 90, 90);
+        path.addRect(-20, -20, 40, 40);
         thePolygon = path.toFillPolygon();
         setToolTip(QString("Square Note"));
         break;
 
     case GeomRectangleType:
-        path.addRect(-100, -50, 200, 100);
+        path.addRect(-50, -25, 100, 50);
         thePolygon = path.toFillPolygon();
         setToolTip(QString("Rectangle Note"));
         break;
 
     case GeomCircleType:
-        path.addEllipse(-50, -50, 100, 100);
+        path.addEllipse(-25, -25, 50, 50);
         thePolygon = path.toFillPolygon();
         setToolTip(QString("Circle Note"));
         break;
 
     case GeomTriangleType:
-        thePolygon << QPointF(-60, 50) << QPointF(0, -50) << QPointF(60, 50) << QPointF(-60, 50);
+        thePolygon << QPointF(-25, 25) << QPointF(0, -25) << QPointF(25, 25) << QPointF(-25, 25);
         setToolTip(QString("Tirangle Note"));
         break;
 
@@ -133,7 +133,7 @@ void DiagramItem::addArrow(Arrow *arrow)
 
 void DiagramItem::setText(const QString& theText)
 {
-    this->theText->setHtml(theText);
+    this->theText->setPlainText(theText);
 }
 
 void DiagramItem::setLabelPos(qreal x, qreal y)

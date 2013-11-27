@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = mozart
 TEMPLATE = app
@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     Diagram/DiagramScene.cpp \
     TinyXML/tinyxml2.cpp \
     ModelMapper.cpp \
-    NodePropertiesDialog.cpp
+    NodePropertiesDialog.cpp \
+    ModelPropertiesDialog.cpp
 
 HEADERS  += concerto.h \
     diagramwindow.h \
@@ -84,10 +85,12 @@ HEADERS  += concerto.h \
     Undoable/InsertRelation.h \
     Undoable/RemoveNode.h \
     Undoable/RemoveRelation.h \
-    Undoable/MoveNode.h
+    Undoable/MoveNode.h \
+    ModelPropertiesDialog.h
 
 FORMS    += concerto.ui \
-    nodepropertiesdialog.ui
+    nodepropertiesdialog.ui \
+    modelpropertiesdialog.ui
 
 RESOURCES += \
     Image-Resources.qrc
