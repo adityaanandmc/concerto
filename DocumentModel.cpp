@@ -189,7 +189,7 @@ bool DocumentModel::validate()
             theVertex = *vi;
 
             if (theGraph[theVertex].theNode->validatable()) {
-                theVertices.push_back(theVertex);\
+                theVertices.push_back(theVertex);
             }
         }
     }
