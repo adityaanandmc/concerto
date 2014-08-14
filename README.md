@@ -6,6 +6,9 @@ on the Qt Framework (version 5, but 4.8 does it too ;) ).
 
 (More content to come when I have the time to write more!)
 
+![Freshly Opened](http://i.imgur.com/tNKvskk.jpg)
+![Working Diagram](http://i.imgur.com/lCtVuyK.jpg)
+
 ## Dependencies
 
 This software requires Boost's Graph Library (BGL) installed in order to be built. If you're using qt-creator
